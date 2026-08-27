@@ -1,0 +1,199 @@
+{% extends 'base.html' %} {% block title %}Register{% endblock %} {% block
+navbar %}{% endblock %} {% block body %}
+<div
+  class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+>
+  <div class="max-w-md w-full space-y-8">
+    <!-- Register Card -->
+    <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+      <!-- Header -->
+      <div class="text-center">
+        <div
+          class="mx-auto h-20 w-20 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-6"
+        >
+          <i class="fas fa-user-plus text-white text-3xl"></i>
+        </div>
+        <h2
+          class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2"
+        >
+          Create Account
+        </h2>
+        <p class="text-gray-600 mb-8">
+          Join SIP Tracker and start tracking your progress
+        </p>
+      </div>
+
+      <!-- Register Form -->
+      <form method="POST" class="space-y-6">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+        <div>
+          <label
+            for="username"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Username
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-user text-gray-400"></i>
+            </div>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              class="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-lg"
+              placeholder="Choose a username"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="password"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Password
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-lock text-gray-400"></i>
+            </div>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              class="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-lg"
+              placeholder="Create a password"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="role"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Role
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-user-tag text-gray-400"></i>
+            </div>
+            <select
+              id="role"
+              name="role"
+              class="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-lg appearance-none bg-white"
+              required
+            >
+              <option value="student">Student</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="sip_center_supervisor">
+                SIP Center Supervisor
+              </option>
+            </select>
+            <div
+              class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-chevron-down text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <div id="supervisor-select" class="hidden">
+          <label
+            for="supervisor_id"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Supervisor
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-user-tie text-gray-400"></i>
+            </div>
+            <select
+              id="supervisor_id"
+              name="supervisor_id"
+              class="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-lg appearance-none bg-white"
+            >
+              <option value="">Select supervisor...</option>
+              {% for sup in supervisors %}
+              <option value="{{ sup.id }}">{{ sup.username }}</option>
+              {% endfor %}
+            </select>
+            <div
+              class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-chevron-down text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-xl text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+        >
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <i
+              class="fas fa-user-plus text-green-200 group-hover:text-white transition-colors duration-200"
+            ></i>
+          </span>
+          Create Account
+        </button>
+      </form>
+
+      <!-- Login Link -->
+      <div class="mt-8 text-center">
+        <p class="text-gray-600">
+          Already have an account?
+          <a
+            href="{{ url_for('login') }}"
+            class="font-medium text-green-600 hover:text-green-500 transition-colors duration-200"
+          >
+            Sign in here
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="text-center">
+      <p class="text-sm text-gray-500">
+        <i class="fas fa-shield-alt mr-1"></i>
+        Your information is secure and private
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const role = document.getElementById("role");
+    const supWrap = document.getElementById("supervisor-select");
+    const supSelect = document.getElementById("supervisor_id");
+
+    function toggleSup() {
+      if (role.value === "student") {
+        supWrap.classList.remove("hidden");
+        supWrap.classList.add("block");
+      } else {
+        supWrap.classList.add("hidden");
+        supWrap.classList.remove("block");
+        supSelect.value = "";
+      }
+    }
+
+    role.addEventListener("change", toggleSup);
+    toggleSup();
+  });
+</script>
+{% endblock %}

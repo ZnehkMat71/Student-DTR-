@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}App{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+              },
+              secondary: {
+                50: "#f8fafc",
+                100: "#f1f5f9",
+                500: "#64748b",
+                600: "#475569",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #17212b;
+        --muted: #64727d;
+        --line: #dfe6e8;
+        --canvas: #f4f7f6;
+        --surface: #ffffff;
+        --teal: #087f78;
+        --teal-dark: #05635f;
+        --teal-soft: #e2f3f0;
+        --amber-soft: #fff4d6;
+        --shadow: 0 10px 30px rgba(23, 33, 43, 0.06);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-width: 320px;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        color: var(--ink) !important;
+        background-color: var(--canvas) !important;
+        background-image:
+          linear-gradient(rgba(8, 127, 120, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(8, 127, 120, 0.025) 1px, transparent 1px) !important;
+        background-size: 32px 32px !important;
+        font-family: "DM Sans", sans-serif !important;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: 0;
+      }
+      h1 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem) !important;
+        line-height: 1.1 !important;
+      }
+      p {
+        line-height: 1.55;
+      }
+      a {
+        color: inherit;
+      }
+
+      nav {
+        background: rgba(255, 255, 255, 0.94) !important;
+        border-color: var(--line) !important;
+        box-shadow: 0 1px 0 rgba(23, 33, 43, 0.04) !important;
+        backdrop-filter: blur(12px);
+      }
+
+      nav a:first-child {
+        color: var(--teal) !important;
+        background: none !important;
+        -webkit-text-fill-color: currentColor;
+      }
+
+      .bg-white {
+        background-color: var(--surface) !important;
+      }
+      .shadow-lg,
+      .shadow-xl,
+      .shadow-2xl {
+        box-shadow: var(--shadow) !important;
+      }
+      .border-gray-100,
+      .border-gray-200,
+      .border-gray-300 {
+        border-color: var(--line) !important;
+      }
+      .text-gray-900,
+      .text-gray-800 {
+        color: var(--ink) !important;
+      }
+      .text-gray-700,
+      .text-gray-600 {
+        color: var(--muted) !important;
+      }
+      .text-transparent {
+        color: var(--teal) !important;
+        background-image: none !important;
+        -webkit-text-fill-color: currentColor;
+      }
+      .rounded-2xl,
+      .rounded-3xl {
+        border-radius: 14px !important;
+      }
+      button[class~="bg-gradient-to-r"],
+      a[class~="bg-gradient-to-r"] {
+        background-image: none !important;
+        background-color: var(--teal) !important;
+      }
+      button[class~="bg-gradient-to-r"]:hover,
+      a[class~="bg-gradient-to-r"]:hover {
+        background-color: var(--teal-dark) !important;
+      }
+      [class~="bg-gradient-to-r"][class~="rounded-full"] {
+        background-image: none !important;
+        background-color: var(--teal) !important;
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button {
+        border-radius: 10px !important;
+      }
+      form button[type="submit"] {
+        background-image: none !important;
+        background-color: var(--teal) !important;
+      }
+      form button[type="submit"]:hover {
+        background-color: var(--teal-dark) !important;
+      }
+      form button[type="submit"][disabled] {
+        background-color: #cbd5e1 !important;
+        color: #64748b !important;
+        cursor: not-allowed;
+      }
+      button:hover,
+      a.transform:hover {
+        transform: none !important;
+      }
+      input,
+      select,
+      textarea {
+        border-radius: 10px !important;
+        border-color: var(--line) !important;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--teal) !important;
+        box-shadow: 0 0 0 3px rgba(8, 127, 120, 0.13) !important;
+      }
+      table {
+        font-size: 0.9rem;
+      }
+      th {
+        color: var(--muted) !important;
+        font-size: 0.7rem !important;
+        letter-spacing: 0.08em !important;
+      }
+      footer {
+        background: rgba(255, 255, 255, 0.7) !important;
+        border-color: var(--line) !important;
+      }
+      .biometric-time {
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+      }
+
+      @media (max-width: 767px) {
+        nav .max-w-7xl {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+        nav .h-16 {
+          height: 3.75rem;
+        }
+        body {
+          padding-bottom: 3.75rem;
+        }
+        body > footer {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 30;
+        }
+        body > footer .py-6 {
+          padding-top: 0.8rem !important;
+          padding-bottom: 0.8rem !important;
+        }
+        nav a:first-child {
+          font-size: 1.25rem !important;
+        }
+        body > div,
+        body > main {
+          width: 100%;
+        }
+        .min-h-screen.py-8 {
+          padding-top: 1.25rem !important;
+          padding-bottom: 1.25rem !important;
+        }
+        .max-w-7xl {
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+        }
+        .p-8 {
+          padding: 1.25rem !important;
+        }
+        .p-6 {
+          padding: 1rem !important;
+        }
+        .mb-12 {
+          margin-bottom: 2rem !important;
+        }
+        .mb-8 {
+          margin-bottom: 1.5rem !important;
+        }
+        .text-4xl {
+          font-size: 1.8rem !important;
+        }
+        .text-3xl {
+          font-size: 1.65rem !important;
+        }
+        .grid {
+          gap: 1rem !important;
+        }
+        .overflow-x-auto {
+          -webkit-overflow-scrolling: touch;
+        }
+        table {
+          min-width: 640px;
+        }
+        #profileSidebar {
+          width: min(88vw, 22rem);
+        }
+        #addStudentModal > div,
+        #editProfileModal > div {
+          max-height: calc(100vh - 2rem);
+          overflow-y: auto;
+        }
+        .flex.flex-wrap.gap-4 {
+          gap: 0.65rem !important;
+        }
+        .flex.flex-wrap.gap-4 > a {
+          flex: 1 1 10rem;
+          justify-content: center;
+        }
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen"
+  >
+    {% block navbar %}
+    <!-- Navigation -->
+    <nav
+      class="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <a
+              href="{{ url_for('index') }}"
+              class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+            >
+              SIP Tracker
+            </a>
+          </div>
+
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-baseline space-x-4">
+              {% if current_user.is_authenticated %}
+              <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 text-gray-600">
+                  <!--i class="fas fa-user-circle text-lg"></i>
+                    <span class="font-medium">{{ current_user.username }}</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      {{ current_user.role|default('user') }}
+                    </span-->
+                </div>
+                {% if current_user.role in ['supervisor',
+                'sip_center_supervisor'] %}
+                <button
+                  onclick="openAddStudentModal()"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
+                >
+                  <i class="fas fa-user-plus mr-2"></i>Add Student
+                </button>
+                {% endif %}
+                <button
+                  onclick="toggleProfileSidebar()"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  <i class="fas fa-user mr-2"></i>Profile
+                </button>
+                <form
+                  method="post"
+                  action="{{ url_for('logout') }}"
+                  class="inline"
+                >
+                  <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <button
+                    type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                  >
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                  </button>
+                </form>
+              </div>
+              {% else %}
+              <a
+                href="{{ url_for('login') }}"
+                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+              </a>
+              <a
+                href="{{ url_for('register') }}"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <i class="fas fa-user-plus mr-2"></i>Register
+              </a>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button
+              type="button"
+              class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              aria-controls="mobile-menu"
+              aria-expanded="false"
+              onclick="toggleMobileMenu()"
+            >
+              <span class="sr-only">Open main menu</span>
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="md:hidden hidden" id="mobile-menu">
+        <div
+          class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200"
+        >
+          {% if current_user.is_authenticated %}
+          <div class="px-3 py-2 text-sm text-gray-600">
+            <i class="fas fa-user-circle mr-2"></i>{{ current_user.username }}
+            <span
+              class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+            >
+              {{ current_user.role|default('user') }}
+            </span>
+          </div>
+          {% if current_user.role in ['supervisor', 'sip_center_supervisor'] %}
+          <button
+            onclick="
+              toggleMobileMenu();
+              openAddStudentModal();
+            "
+            class="block w-full text-left px-3 py-2 text-base font-medium text-emerald-700 hover:bg-emerald-50 rounded-md"
+          >
+            <i class="fas fa-user-plus mr-2"></i>Add Student
+          </button>
+          {% endif %}
+          <button
+            onclick="toggleProfileSidebar()"
+            class="block w-full text-left px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 rounded-md"
+          >
+            <i class="fas fa-user mr-2"></i>Profile
+          </button>
+          <form method="post" action="{{ url_for('logout') }}">
+            <input
+              type="hidden"
+              name="_csrf_token"
+              value="{{ csrf_token() }}"
+            />
+            <button
+              type="submit"
+              class="block px-3 py-2 text-base font-medium text-red-600 hover:text-red-500 hover:bg-red-50 rounded-md"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+          </form>
+          {% else %}
+          <a
+            href="{{ url_for('login') }}"
+            class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 rounded-md"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i>Login
+          </a>
+          <a
+            href="{{ url_for('register') }}"
+            class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 rounded-md"
+          >
+            <i class="fas fa-user-plus mr-2"></i>Register
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+    {% endblock %} {% block global_flashes %}
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
+      {% for category, message in messages %}
+      <div
+        class="px-4 py-3 rounded-lg shadow-sm border {% if category == 'warning' %}bg-amber-50 border-amber-200 text-amber-900{% elif category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}"
+      >
+        <div class="flex">
+          <div class="flex-shrink-0">
+            {% if category == 'warning' %}
+            <i class="fas fa-exclamation-triangle"></i>
+            {% elif category == 'success' %}
+            <i class="fas fa-check-circle"></i>
+            {% else %}
+            <i class="fas fa-info-circle"></i>
+            {% endif %}
+          </div>
+          <div class="ml-3">
+            <p class="text-sm">{{ message }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %} {% endblock %} {% block body %}{% endblock %} {%
+    if current_user.is_authenticated and current_user.role in ['supervisor',
+    'sip_center_supervisor'] %}
+    <!-- Add Student Modal -->
+    <div
+      id="addStudentOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"
+    ></div>
+    <div
+      id="addStudentModal"
+      class="fixed inset-0 z-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+        <div
+          class="flex items-center justify-between p-6 border-b border-gray-200"
+        >
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-user-plus text-emerald-600 mr-2"></i>Add Student
+          </h3>
+          <button
+            onclick="closeAddStudentModal()"
+            class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          >
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+        <form
+          method="post"
+          action="{{ url_for('enroll_student') if current_user.role == 'supervisor' else url_for('add_student') }}"
+          class="p-6 space-y-4"
+        >
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+          <div
+            id="addStudentAlert"
+            class="hidden px-4 py-3 rounded-xl text-sm"
+          ></div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Student Username</label
+            >
+            <input
+              type="text"
+              name="{{ 'student_id' if current_user.role == 'supervisor' else 'student_username' }}"
+              id="studentUsernameInput"
+              list="studentUsernameList"
+              placeholder="Search or type a username"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              required
+            />
+            <datalist id="studentUsernameList"></datalist>
+            <p id="studentLookupHint" class="text-xs text-gray-500 mt-2">
+              Start typing to search. List auto-loads on open.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Course / Section</label
+              >
+              <input
+                type="text"
+                name="course_section"
+                placeholder="e.g., BSIT 3A"
+                class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Start Date</label
+              >
+              <input
+                type="date"
+                name="start_date"
+                class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Notes</label
+            >
+            <textarea
+              name="notes"
+              rows="2"
+              placeholder="Optional short note"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            ></textarea>
+          </div>
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onclick="closeAddStudentModal()"
+              class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-xl text-white bg-emerald-600 hover:bg-emerald-700"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %} {% if current_user.is_authenticated %}
+    <!-- Edit Profile Modal -->
+    <div
+      id="editProfileOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"
+    ></div>
+    <div
+      id="editProfileModal"
+      class="fixed inset-0 z-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+        <div
+          class="flex items-center justify-between p-6 border-b border-gray-200"
+        >
+          <h3 class="text-lg font-semibold text-gray-800">
+            <i class="fas fa-user-edit text-blue-600 mr-2"></i>Edit Profile
+          </h3>
+          <button
+            onclick="closeEditProfileModal()"
+            class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          >
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+
+        <form
+          method="post"
+          action="{{ url_for('dashboard') }}"
+          enctype="multipart/form-data"
+          class="p-6 space-y-4"
+        >
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Username</label
+            >
+            <input
+              type="text"
+              name="username"
+              value="{{ current_user.username }}"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >New Password</label
+            >
+            <input
+              type="password"
+              name="password"
+              placeholder="Leave blank to keep current"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Profile Photo</label
+            >
+            <input
+              type="file"
+              name="photo"
+              accept="image/*"
+              class="block w-full text-sm text-gray-700 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {% if upload_message %}
+            <p class="mt-2 text-sm text-gray-600">{{ upload_message }}</p>
+            {% endif %}
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onclick="closeEditProfileModal()"
+              class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded-xl text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    <!-- User Profile Sidebar -->
+    {% if current_user.is_authenticated %}
+    <div
+      id="profileSidebar"
+      class="fixed inset-y-0 right-0 z-50 w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out"
+    >
+      <!-- Sidebar Header -->
+      <div
+        class="flex items-center justify-between p-6 border-b border-gray-200"
+      >
+        <h3 class="text-lg font-semibold text-gray-800">Profile</h3>
+        <button
+          onclick="toggleProfileSidebar()"
+          class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+        >
+          <i class="fas fa-times text-gray-500"></i>
+        </button>
+      </div>
+
+      <!-- Profile Content -->
+      <div class="p-6 space-y-6">
+        <!-- User Avatar & Info -->
+        <div class="text-center">
+          <div class="relative inline-block mb-4">
+            {% set sidebar_photo_url = current_user.photo and
+            url_for('profile_photo', filename=current_user.photo) or
+            'https://ui-avatars.com/api/?name=' ~ current_user.username ~
+            '&background=0D8ABC&color=fff&size=128' %}
+            <img
+              src="{{ sidebar_photo_url }}"
+              alt="{{ current_user.username }}"
+              class="w-24 h-24 rounded-full object-cover shadow-lg mx-auto"
+            />
+            <div
+              class="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center"
+            >
+              <i class="fas fa-check text-white text-xs"></i>
+            </div>
+          </div>
+          <h4 class="text-xl font-bold text-gray-800 mb-1">
+            {{ current_user.username }}
+          </h4>
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+          >
+            <i class="fas fa-user-tag mr-1"></i>{{ current_user.role|title }}
+          </span>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
+          <h5 class="text-sm font-medium text-gray-600 mb-3">Quick Stats</h5>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600">0</div>
+              <div class="text-xs text-gray-500">Total Hours</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600">0</div>
+              <div class="text-xs text-gray-500">Attendance %</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="space-y-2">
+          <h5 class="text-sm font-medium text-gray-600 mb-3">Quick Actions</h5>
+          <button
+            type="button"
+            onclick="openEditProfileModal()"
+            class="w-full text-left flex items-center p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 group"
+          >
+            <i
+              class="fas fa-user-edit text-gray-400 group-hover:text-blue-500 mr-3"
+            ></i>
+            <span class="text-gray-700 group-hover:text-blue-600"
+              >Edit Profile</span
+            >
+          </button>
+          {% if current_user.role == 'supervisor' %}
+          <a
+            href="{{ url_for('supervisor_dashboard') }}"
+            class="flex items-center p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 group"
+          >
+            <i
+              class="fas fa-users text-gray-400 group-hover:text-purple-500 mr-3"
+            ></i>
+            <span class="text-gray-700 group-hover:text-purple-600"
+              >Manage Students</span
+            >
+          </a>
+          {% endif %} {% if current_user.role == 'sip_center_supervisor' %}
+          <a
+            href="{{ url_for('sip_center_supervisor_dashboard') }}"
+            class="flex items-center p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 group"
+          >
+            <i
+              class="fas fa-building text-gray-400 group-hover:text-emerald-500 mr-3"
+            ></i>
+            <span class="text-gray-700 group-hover:text-emerald-600"
+              >Center Overview</span
+            >
+          </a>
+          {% endif %}
+        </div>
+
+        <!-- Profile Actions -->
+        <div class="pt-4 border-t border-gray-200">
+          <form method="post" action="{{ url_for('logout') }}">
+            <input
+              type="hidden"
+              name="_csrf_token"
+              value="{{ csrf_token() }}"
+            />
+            <button
+              type="submit"
+              class="block w-full text-center bg-gradient-to-r from-red-500 to-pink-600 text-white py-3 px-4 rounded-xl font-medium hover:from-red-600 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"
+      onclick="toggleProfileSidebar()"
+    ></div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer
+      class="bg-white/50 backdrop-blur-sm border-t border-gray-200/50 mt-auto"
+    >
+      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="text-center text-gray-500 text-sm">
+          &copy; <span id="year"></span> SIP Tracker. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      function toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('hidden');
+      }
+
+      // Add Student Modal logic
+      async function openAddStudentModal() {
+        const modal = document.getElementById('addStudentModal');
+        const overlay = document.getElementById('addStudentOverlay');
+        const list = document.getElementById('studentUsernameList');
+        const alertBox = document.getElementById('addStudentAlert');
+        if (alertBox) {
+          alertBox.className = 'hidden px-4 py-3 rounded-xl text-sm';
+          alertBox.textContent = '';
+        }
+        if (list && list.options.length === 0) {
+          try {
+            const resp = await fetch('{{ url_for('students_list') }}');
+            if (resp.ok) {
+              const data = await resp.json();
+              list.innerHTML = '';
+              (data || []).forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.username;
+                list.appendChild(opt);
+              });
+            }
+          } catch (e) {
+            console.error('Failed to load students', e);
+          }
+        }
+        modal.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+        document.getElementById('studentUsernameInput')?.focus();
+      }
+
+      function closeAddStudentModal() {
+        const modal = document.getElementById('addStudentModal');
+        const overlay = document.getElementById('addStudentOverlay');
+        modal.classList.add('hidden');
+        overlay.classList.add('hidden');
+      }
+
+      // Close modal on escape
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          const modal = document.getElementById('addStudentModal');
+          if (modal && !modal.classList.contains('hidden')) {
+            closeAddStudentModal();
+          }
+        }
+      });
+
+      // Close modal when clicking overlay
+      document.addEventListener('click', function(event) {
+        const overlay = document.getElementById('addStudentOverlay');
+        const modal = document.getElementById('addStudentModal');
+        if (overlay && event.target === overlay) {
+          closeAddStudentModal();
+        }
+        if (modal && !modal.classList.contains('hidden')) {
+          const content = modal.querySelector('div.bg-white');
+          if (content && !content.contains(event.target) && event.target !== modal) {
+            // Clicked outside modal content
+            // Do nothing; overlay handles close
+          }
+        }
+      });
+
+      // Handle AJAX submit for add student
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('#addStudentModal form');
+        if (!form) return;
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const alertBox = document.getElementById('addStudentAlert');
+          if (alertBox) {
+            alertBox.className = 'px-4 py-3 rounded-xl text-sm bg-blue-50 text-blue-700';
+            alertBox.textContent = 'Processing...';
+          }
+          try {
+            const formData = new FormData(form);
+            const resp = await fetch(form.action, {
+              method: 'POST',
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
+              body: formData
+            });
+            const data = await resp.json();
+            if (data && data.success) {
+              if (alertBox) {
+                alertBox.className = 'px-4 py-3 rounded-xl text-sm bg-emerald-50 text-emerald-700';
+                alertBox.textContent = data.message || 'Student enrolled successfully.';
+              }
+              // Refresh table if on supervisor dashboard
+              setTimeout(() => {
+                if (window.location.pathname.indexOf('supervisor_dashboard') !== -1) {
+                  window.location.reload();
+                } else {
+                  window.location.href = '{{ url_for('supervisor_dashboard') }}';
+                }
+              }, 800);
+            } else {
+              const msg = (data && data.message) ? data.message : 'Enrollment failed.';
+              if (alertBox) {
+                alertBox.className = 'px-4 py-3 rounded-xl text-sm bg-red-50 text-red-700';
+                alertBox.textContent = msg;
+              }
+            }
+          } catch (err) {
+            if (alertBox) {
+              alertBox.className = 'px-4 py-3 rounded-xl text-sm bg-red-50 text-red-700';
+              alertBox.textContent = 'An error occurred. Please try again.';
+            }
+          }
+        });
+      });
+
+      function toggleProfileSidebar() {
+        const sidebar = document.getElementById('profileSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (sidebar.classList.contains('translate-x-full')) {
+          // Open sidebar
+          sidebar.classList.remove('translate-x-full');
+          overlay.classList.remove('hidden');
+          document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        } else {
+          // Close sidebar
+          sidebar.classList.add('translate-x-full');
+          overlay.classList.add('hidden');
+          document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+      }
+
+      // Close sidebar on escape key
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          const sidebar = document.getElementById('profileSidebar');
+          const overlay = document.getElementById('sidebarOverlay');
+          if (!sidebar.classList.contains('translate-x-full')) {
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+          }
+        }
+      });
+
+      // Close sidebar when clicking outside
+      document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('profileSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const profileButton = event.target.closest('[onclick="toggleProfileSidebar()"]');
+        if (!sidebar || !overlay) return;
+        if (!sidebar.contains(event.target) && !profileButton && !sidebar.classList.contains('translate-x-full')) {
+          sidebar.classList.add('translate-x-full');
+          overlay.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+      });
+
+      // Edit Profile Modal logic
+      function openEditProfileModal() {
+        const modal = document.getElementById('editProfileModal');
+        const overlay = document.getElementById('editProfileOverlay');
+        modal.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+      }
+
+      function closeEditProfileModal() {
+        const modal = document.getElementById('editProfileModal');
+        const overlay = document.getElementById('editProfileOverlay');
+        modal.classList.add('hidden');
+        overlay.classList.add('hidden');
+      }
+
+      // Close edit profile modal on escape
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          const modal = document.getElementById('editProfileModal');
+          if (modal && !modal.classList.contains('hidden')) {
+            closeEditProfileModal();
+          }
+        }
+      });
+
+      // Close edit profile modal when clicking overlay
+      document.addEventListener('click', function(event) {
+        const overlay = document.getElementById('editProfileOverlay');
+        if (overlay && event.target === overlay) {
+          closeEditProfileModal();
+        }
+      });
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

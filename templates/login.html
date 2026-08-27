@@ -1,0 +1,135 @@
+{% extends 'base.html' %} {% block title %}Login{% endblock %} {% block navbar
+%}{% endblock %} {% block global_flashes %}{% endblock %} {% block body %}
+<div
+  class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+>
+  <div class="max-w-md w-full space-y-8">
+    <!-- Login Card -->
+    <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+      <!-- Header -->
+      <div class="text-center">
+        <div
+          class="mx-auto h-20 w-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6"
+        >
+          <i class="fas fa-user text-white text-3xl"></i>
+        </div>
+        <h2
+          class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2"
+        >
+          Welcome Back
+        </h2>
+        <p class="text-gray-600 mb-8">Sign in to your SIP Tracker account</p>
+      </div>
+
+      <!-- Login Form -->
+      <form method="POST" class="space-y-6">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <div
+          id="loginInlineAlert"
+          class="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3"
+          role="alert"
+        >
+          {% for message in messages %}
+          <div>{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+        <div>
+          <label
+            for="username"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Username
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-user text-gray-400"></i>
+            </div>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              class="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg"
+              placeholder="Enter your username"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="password"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Password
+          </label>
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-lock text-gray-400"></i>
+            </div>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              class="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+        >
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <i
+              class="fas fa-sign-in-alt text-blue-200 group-hover:text-white transition-colors duration-200"
+            ></i>
+          </span>
+          Sign In
+        </button>
+      </form>
+
+      <!-- Register Link -->
+      <div class="mt-8 text-center">
+        <p class="text-gray-600">
+          Don't have an account?
+          <a
+            href="{{ url_for('register') }}"
+            class="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+          >
+            Create one here
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="text-center">
+      <p class="text-sm text-gray-500">
+        <i class="fas fa-shield-alt mr-1"></i>
+        Your data is secure and encrypted
+      </p>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  // Auto-hide inline login error after 10 seconds
+  (function () {
+    const alertEl = document.getElementById("loginInlineAlert");
+    if (alertEl) {
+      setTimeout(() => {
+        alertEl.classList.add("hidden");
+      }, 10000);
+    }
+  })();
+</script>
+{% endblock %} {% endblock %}
