@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Attendance policy · SIP Tracker{% endblock %}
+{% block body %}
+<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <header class="page-header">
+    <div><p class="text-sm font-semibold uppercase tracking-wide text-teal-700">Administration</p><h1 class="font-bold text-gray-900">Attendance policy</h1><p>Configure workdays, late grace, break rules, and attendance reminders.</p></div>
+    <a href="{{ url_for('admin_dashboard') }}" class="inline-flex min-h-11 items-center rounded-lg border border-gray-200 bg-white px-4 font-semibold text-gray-700">Back to users</a>
+  </header>
+  <form method="post" class="dashboard-card space-y-6 p-5 sm:p-7">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Timezone (IANA)</span><input required maxlength="64" name="timezone_name" value="{{ policy.timezone_name }}" class="w-full" placeholder="Asia/Manila"></label>
+      <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Late grace period (minutes)</span><input required type="number" min="0" max="240" name="grace_minutes" value="{{ policy.grace_minutes }}" class="w-full"></label>
+      <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Work starts</span><input required type="time" name="work_start" value="{{ policy.work_start }}" class="w-full"></label>
+      <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Work ends</span><input required type="time" name="work_end" value="{{ policy.work_end }}" class="w-full"></label>
+      <fieldset class="sm:col-span-2">
+        <legend class="mb-2 text-sm font-medium text-gray-700">Workdays</legend>
+        <div class="flex flex-wrap gap-x-5 gap-y-2">
+          {% for number, label in [(0,'Monday'), (1,'Tuesday'), (2,'Wednesday'), (3,'Thursday'), (4,'Friday'), (5,'Saturday'), (6,'Sunday')] %}
+          <label class="inline-flex min-h-11 items-center gap-2"><input type="checkbox" name="workdays" value="{{ number }}" {% if number in workday_numbers %}checked{% endif %}>{{ label }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    </div>
+    <fieldset class="border-t border-gray-100 pt-5">
+      <legend class="mb-3 text-lg font-semibold text-gray-900">Break policy</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Lunch time-out opens</span><input required type="time" name="lunch_window_start" value="{{ policy.lunch_window_start }}" class="w-full"></label>
+        <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Lunch window ends</span><input required type="time" name="lunch_window_end" value="{{ policy.lunch_window_end }}" class="w-full"></label>
+        <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Maximum lunch (minutes)</span><input required type="number" min="1" max="240" name="lunch_max_minutes" value="{{ policy.lunch_max_minutes }}" class="w-full"></label>
+      </div>
+    </fieldset>
+    <fieldset class="border-t border-gray-100 pt-5">
+      <legend class="mb-3 text-lg font-semibold text-gray-900">Daily reminders</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Reminder time</span><input required type="time" name="reminder_time" value="{{ policy.reminder_time }}" class="w-full"></label>
+        <label class="inline-flex min-h-11 items-center gap-2 self-end"><input type="checkbox" name="reminders_enabled" value="on" {% if policy.reminders_enabled %}checked{% endif %}>Enable attendance reminders</label>
+      </div>
+      <p class="mt-3 text-sm text-gray-500">Schedule daily attendance reminders after this time. For lunch reminders, also schedule the lunch-reminder command every 5 minutes from 5 minutes before the lunch window through 5 minutes after it ends. Run email dispatch regularly.</p>
+    </fieldset>
+    <div class="flex justify-end"><button class="min-h-11 rounded-lg bg-teal-700 px-5 font-semibold text-white hover:bg-teal-800">Save policy</button></div>
+  </form>
+  <section class="dashboard-card mt-7 overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 p-5">
+      <div><h2 class="text-lg font-semibold text-gray-900">Holidays</h2><p class="text-sm text-gray-500">Holidays are excluded from reminder generation.</p></div>
+      <form method="post" class="flex flex-wrap gap-2">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="add_holiday">
+        <label><span class="sr-only">Holiday name</span><input required maxlength="120" name="holiday_name" placeholder="Holiday name"></label>
+        <label><span class="sr-only">Holiday date</span><input required type="date" name="holiday_date"></label>
+        <button class="min-h-11 rounded-lg border border-teal-200 px-4 font-semibold text-teal-800 hover:bg-teal-50">Add holiday</button>
+      </form>
+    </div>
+    {% if holidays %}
+    <ul class="divide-y divide-gray-100">
+      {% for holiday in holidays %}
+      <li class="flex items-center justify-between gap-3 px-5 py-3"><span><strong class="text-gray-900">{{ holiday.name }}</strong><time class="ml-2 text-sm text-gray-500" datetime="{{ holiday.holiday_date.isoformat() }}">{{ holiday.holiday_date.strftime('%b %d, %Y') }}</time></span><form method="post" action="{{ url_for('admin_delete_holiday', holiday_id=holiday.id) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="min-h-10 px-3 text-sm font-semibold text-red-700 hover:bg-red-50">Remove</button></form></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="p-5 text-sm text-gray-500">No holidays configured.</p>{% endif %}
+  </section>
+</main>
+{% endblock %}

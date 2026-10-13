@@ -1,11 +1,16 @@
 {% extends 'base.html' %} {% block title %}Login{% endblock %} {% block navbar
 %}{% endblock %} {% block global_flashes %}{% endblock %} {% block body %}
 <div
-  class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+  class="auth-layout min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
 >
-  <div class="max-w-md w-full space-y-8">
+  <div class="auth-content max-w-md w-full space-y-8">
     <!-- Login Card -->
-    <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+    <div class="auth-card bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+      <button type="button" class="theme-toggle auth-theme-toggle mb-6" data-theme-toggle aria-pressed="false">
+        <i class="fas fa-moon theme-icon-light" aria-hidden="true"></i>
+        <i class="fas fa-sun theme-icon-dark" aria-hidden="true"></i>
+        <span data-theme-label>Dark mode</span>
+      </button>
       <!-- Header -->
       <div class="text-center">
         <div

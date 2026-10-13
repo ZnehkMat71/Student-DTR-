@@ -37,18 +37,47 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        let theme;
+        try {
+          theme = localStorage.getItem('sip-tracker-theme');
+        } catch (error) {
+          console.warn('Theme preference could not be read from local storage.', error);
+        }
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <style>
       :root {
-        --ink: #17212b;
-        --muted: #64727d;
-        --line: #dfe6e8;
-        --canvas: #f4f7f6;
+              --ink: #0f172a;
+              --muted: #64748b;
+              --line: #e2e8f0;
+              --canvas: #f4f7fb;
         --surface: #ffffff;
-        --teal: #087f78;
-        --teal-dark: #05635f;
-        --teal-soft: #e2f3f0;
-        --amber-soft: #fff4d6;
-        --shadow: 0 10px 30px rgba(23, 33, 43, 0.06);
+              --teal: #2563eb;
+              --teal-dark: #1d4ed8;
+              --teal-soft: #eff6ff;
+              --sidebar: #0f172a;
+              --sidebar-muted: #a5b4cf;
+              --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      }
+      html[data-theme="dark"] {
+        color-scheme: dark;
+              --ink: #e2e8f0;
+              --muted: #a5b4cf;
+              --line: #334155;
+              --canvas: #0f172a;
+              --surface: #111827;
+              --teal: #60a5fa;
+              --teal-dark: #93c5fd;
+              --teal-soft: rgba(96, 165, 250, 0.12);
+              --sidebar: #020817;
+              --sidebar-muted: #a5b4cf;
+              --shadow: 0 18px 48px rgba(2, 6, 23, 0.45);
       }
 
       *,
@@ -67,10 +96,7 @@
         min-height: 100vh;
         color: var(--ink) !important;
         background-color: var(--canvas) !important;
-        background-image:
-          linear-gradient(rgba(8, 127, 120, 0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(8, 127, 120, 0.025) 1px, transparent 1px) !important;
-        background-size: 32px 32px !important;
+        background-image: none !important;
         font-family: "DM Sans", sans-serif !important;
       }
 
@@ -93,18 +119,896 @@
       a {
         color: inherit;
       }
-
-      nav {
-        background: rgba(255, 255, 255, 0.94) !important;
-        border-color: var(--line) !important;
-        box-shadow: 0 1px 0 rgba(23, 33, 43, 0.04) !important;
-        backdrop-filter: blur(12px);
+      .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.65rem;
+        min-height: 2.75rem;
+        padding: 0.65rem 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 0.75rem;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .theme-toggle:hover {
+        border-color: var(--teal);
+        background: var(--teal-soft);
+      }
+      .theme-toggle .theme-icon-dark {
+        display: none;
+      }
+      html[data-theme="dark"] .theme-toggle .theme-icon-dark {
+        display: inline-block;
+      }
+      html[data-theme="dark"] .theme-toggle .theme-icon-light {
+        display: none;
+      }
+      .auth-theme-toggle {
+        width: 100%;
+        justify-content: center;
+      }
+      .app-shell-nav .app-theme-toggle {
+        width: 100%;
+        border-color: rgba(255, 255, 255, 0.12);
+        background: transparent;
+        color: var(--sidebar-muted);
+      }
+      .app-shell-nav .app-theme-toggle:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
       }
 
-      nav a:first-child {
+      .app-shell-nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--sidebar) !important;
+        border-color: rgba(148, 163, 184, 0.2) !important;
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06) !important;
+        backdrop-filter: blur(14px);
+      }
+      nav {
+        background: var(--sidebar) !important;
+        border-color: rgba(148, 163, 184, 0.18) !important;
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06) !important;
+      }
+
+      .app-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #fff !important;
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: -0.035em;
+      }
+      .app-brand::before {
+        content: "D";
+        display: grid;
+        width: 2.2rem;
+        height: 2.2rem;
+        place-items: center;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+      .app-shell-nav .max-w-7xl {
+        max-width: none;
+      }
+      .app-shell-nav .app-nav-row {
+        min-height: 100vh;
+        height: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 2rem;
+        padding: 1.5rem 1rem;
+      }
+      .app-shell-nav .app-brand-wrap {
+        padding: 0.5rem 0.75rem 1rem;
+      }
+      .app-shell-nav .app-desktop-navigation {
+        display: block;
+        width: 100%;
+        margin: 0;
+      }
+      .app-shell-nav .app-nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+        margin: 0;
+      }
+      .app-shell-nav .app-nav-links > * {
+        margin: 0 !important;
+      }
+      .app-shell-nav .app-nav-link {
+        color: var(--sidebar-muted);
+      }
+      .app-shell-nav .app-nav-link:hover,
+      .app-shell-nav .app-nav-link[aria-current="page"] {
+        color: #f8fbff;
+        background: rgba(96, 165, 250, 0.14);
+      }
+      .app-shell-nav .app-nav-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        margin-top: auto;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .app-shell-nav .app-nav-actions > * {
+        margin: 0 !important;
+      }
+      .app-shell-nav .app-user-summary {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.25rem 0.75rem 1rem;
+        color: #fff;
+      }
+      .app-shell-nav .app-user-avatar {
+        display: grid;
+        width: 2.4rem;
+        height: 2.4rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: #d8f2e5;
+      }
+      .app-shell-nav .app-user-summary span span:last-child {
+        color: var(--sidebar-muted);
+        font-size: 0.75rem;
+      }
+      .app-shell-nav .app-nav-actions > button,
+      .app-shell-nav .app-nav-actions > form,
+      .app-shell-nav .app-nav-actions > form button {
+        width: 100%;
+      }
+      .app-shell-nav .app-nav-actions > button,
+      .app-shell-nav .app-nav-actions > form button {
+        justify-content: flex-start;
+        min-height: 2.75rem;
+        border: 1px solid transparent;
+        background: transparent !important;
+        color: var(--sidebar-muted) !important;
+        box-shadow: none !important;
+      }
+      .app-shell-nav .app-nav-actions > button:hover,
+      .app-shell-nav .app-nav-actions > form button:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #fff !important;
+      }
+      .app-shell-nav .app-nav-actions > form:last-child button {
+        color: #f3b9ae !important;
+      }
+      .app-shell-nav .app-nav-actions > form:last-child button:hover {
+        background: rgba(196, 76, 58, 0.16) !important;
+      }
+      .app-shell-nav .app-nav-actions > .app-add-student-action {
+        justify-content: center;
+        border-color: transparent;
+        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+        color: #fff !important;
+        font-weight: 700;
+      }
+      .app-shell-nav .app-nav-actions > .app-add-student-action:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        color: #fff !important;
+      }
+      .app-nav-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
+        padding: 0.65rem 0.8rem;
+        border-radius: 0.75rem;
+        color: var(--muted);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+      }
+      .app-nav-link:hover,
+      .app-nav-link[aria-current="page"] {
+        color: var(--teal-dark);
+        background: var(--teal-soft);
+      }
+      .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+      }
+      .page-header h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 3vw, 2.25rem) !important;
+      }
+      .page-header p {
+        margin-top: 0.375rem;
+        color: var(--muted);
+      }
+      .dashboard-card {
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+      .app-main-shell {
+        min-width: 0;
+        flex: 1 0 auto;
+      }
+      .app-authenticated .app-main-shell,
+      .app-authenticated > footer {
+        margin-left: 16rem;
+      }
+      .app-authenticated .app-main-shell {
+        width: calc(100% - 16rem);
+        min-height: 100vh;
+        flex: 0 0 auto;
+      }
+      .app-authenticated > footer {
+        width: calc(100% - 16rem);
+        flex: 0 0 auto;
+      }
+      .app-main-shell > div[class*="max-w-7xl"],
+      .app-main-shell > main {
+        width: 100%;
+      }
+      .app-main-shell .min-h-screen.py-8 {
+        min-height: auto;
+      }
+      .app-main-shell .max-w-7xl,
+      .app-main-shell .max-w-6xl,
+      .app-main-shell .max-w-5xl,
+      .app-main-shell .max-w-4xl {
+        max-width: 90rem;
+      }
+      .app-main-shell main,
+      .app-main-shell > div > div.max-w-7xl {
+        padding-top: clamp(1.5rem, 3vw, 2.5rem);
+        padding-bottom: clamp(2rem, 4vw, 3.5rem);
+      }
+      .app-main-shell > div > .student-dashboard-container {
+        padding-top: 1.25rem !important;
+      }
+      .app-main-shell .page-header h1 {
+        color: var(--ink) !important;
+        font-weight: 700;
+        letter-spacing: -0.045em;
+      }
+      .app-main-shell .page-header p {
+        color: var(--muted) !important;
+      }
+      .app-main-shell .page-header [class*="text-sm"][class*="uppercase"] {
         color: var(--teal) !important;
-        background: none !important;
-        -webkit-text-fill-color: currentColor;
+      }
+      .app-main-shell .dashboard-card,
+      .app-main-shell .bg-white.rounded-2xl,
+      .app-main-shell .bg-white.rounded-3xl {
+        border-radius: 1rem !important;
+        border-color: var(--line) !important;
+        box-shadow: var(--shadow) !important;
+      }
+      .student-dashboard-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .dashboard-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 1rem;
+        padding: 0.25rem 0;
+        min-height: 3.25rem;
+      }
+      .dashboard-search {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: min(100%, 38rem);
+        min-height: 3rem;
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--surface);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .dashboard-search i {
+        color: var(--muted);
+      }
+      .dashboard-metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+      .metric-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 1.15rem;
+        padding: 1.25rem 1.4rem;
+        box-shadow: var(--shadow);
+      }
+      .metric-card .metric-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.9rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .metric-card .metric-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.8rem;
+        background: var(--teal-soft);
+        color: var(--teal-dark);
+      }
+      .metric-card .metric-value {
+        margin: 0;
+        font-size: clamp(1.7rem, 3vw, 2.4rem);
+        line-height: 1.1;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .metric-card .metric-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        padding: 0.18rem 0.46rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+      .dashboard-content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        gap: 1rem;
+      }
+      .dashboard-content-grid > .attendance-panel,
+      .dashboard-content-grid > .dashboard-chart-card {
+        width: 100%;
+        max-width: 58rem;
+      }
+      .attendance-panel {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: linear-gradient(180deg, var(--surface), var(--canvas));
+        box-shadow: var(--shadow);
+      }
+      .attendance-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 6rem;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(14, 165, 233, 0.02));
+      }
+      .attendance-panel-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1.4rem;
+      }
+      .attendance-panels {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.85rem;
+      }
+      .attendance-hero {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 16rem;
+        padding: 0.75rem 0.5rem 0.25rem;
+      }
+      .attendance-ring {
+        display: grid;
+        place-items: center;
+        width: 8.25rem;
+        height: 8.25rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        box-shadow: 0 18px 40px rgba(37, 99, 235, 0.24);
+        color: #fff;
+        font-size: 2.5rem;
+      }
+      .attendance-hero h2 {
+        margin: 0.8rem 0 0.25rem;
+        font-size: clamp(1.5rem, 2vw, 2.1rem);
+        letter-spacing: -0.04em;
+        color: var(--ink);
+      }
+      .attendance-hero .status-line {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .attendance-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .attendance-date i {
+        color: var(--teal);
+      }
+      .attendance-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-column: 1 / -1;
+        gap: 0.85rem;
+      }
+      .attendance-status-card,
+      .attendance-user-card {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        min-width: 0;
+        min-height: 4.25rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--canvas);
+      }
+      .attendance-status-indicator {
+        flex: 0 0 auto;
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        background: #94a3b8;
+        box-shadow: 0 0 0 0.3rem rgba(148, 163, 184, 0.14);
+      }
+      .attendance-status-indicator.is-ready {
+        background: #2563eb;
+        box-shadow: 0 0 0 0.3rem rgba(37, 99, 235, 0.12);
+      }
+      .attendance-status-indicator.is-active {
+        background: #16a34a;
+        box-shadow: 0 0 0 0.3rem rgba(22, 163, 74, 0.12);
+      }
+      .attendance-status-indicator.is-break {
+        background: #d97706;
+        box-shadow: 0 0 0 0.3rem rgba(217, 119, 6, 0.12);
+      }
+      .attendance-meta-copy {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 0.15rem;
+      }
+      .attendance-meta-label {
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .attendance-meta-copy strong {
+        overflow-wrap: anywhere;
+        color: var(--ink);
+        font-size: 0.95rem;
+        line-height: 1.25;
+      }
+      .attendance-user-avatar {
+        display: grid;
+        flex: 0 0 auto;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: var(--teal-soft);
+        color: var(--teal-dark);
+      }
+      .attendance-timestamp {
+        display: block;
+        color: var(--ink);
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: -0.04em;
+      }
+      .attendance-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      .attendance-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+      }
+      .attendance-clock-form {
+        display: flex;
+        justify-content: center;
+      }
+      .attendance-clock-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        padding: 0.25rem;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        text-align: center;
+      }
+      .attendance-clock-button .attendance-ring {
+        transition: box-shadow 150ms ease, transform 150ms ease, filter 150ms ease;
+      }
+      .attendance-clock-button:not(.is-disabled):hover .attendance-ring {
+        box-shadow: 0 20px 42px rgba(37, 99, 235, 0.34);
+        filter: brightness(1.06);
+        transform: translateY(-2px);
+      }
+      .attendance-clock-button:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.45);
+        outline-offset: 5px;
+        border-radius: 1rem;
+      }
+      .attendance-clock-label {
+        color: var(--ink);
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+      .attendance-clock-button.is-disabled {
+        cursor: default;
+      }
+      .attendance-clock-button.is-disabled .attendance-ring {
+        background: #cbd5e1;
+        box-shadow: none;
+      }
+      .attendance-clock-button.is-disabled .attendance-clock-label {
+        color: var(--muted);
+      }
+      .attendance-action:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.45);
+        outline-offset: 3px;
+      }
+      .attendance-time-card {
+        display: flex;
+        min-height: 5.2rem;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--canvas);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .attendance-time-card i {
+        color: var(--teal);
+        font-size: 0.9rem;
+      }
+      .attendance-time-card strong {
+        color: var(--ink);
+        font-size: 1rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .attendance-action {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 5.2rem;
+        padding: 0.9rem 0.7rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .attendance-action.is-primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
+      }
+      .attendance-action.is-muted {
+        background: rgba(148, 163, 184, 0.08);
+      }
+      .attendance-action i {
+        font-size: 1.2rem;
+      }
+      .dashboard-chart-card {
+        border: 1px solid var(--line);
+        border-radius: 1.25rem;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        padding: 1.3rem 1.3rem 1rem;
+      }
+      .dashboard-chart-card h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1.15rem;
+        letter-spacing: -0.03em;
+      }
+      .dashboard-chart-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .mini-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.8rem;
+        margin-top: 1rem;
+      }
+      .mini-stat {
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        background: var(--canvas);
+        padding: 0.7rem;
+      }
+      .mini-stat strong {
+        display: block;
+        margin-bottom: 0.18rem;
+        font-size: 1rem;
+        color: var(--ink);
+      }
+      .mini-stat span {
+        color: var(--muted);
+        font-size: 0.7rem;
+      }
+      @media (max-width: 900px) {
+        .dashboard-content-grid,
+        .attendance-panels {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .dashboard-metric-grid {
+          grid-template-columns: 1fr;
+        }
+        .attendance-meta {
+          grid-template-columns: 1fr;
+        }
+        .attendance-actions {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .management-dashboard {
+        min-width: 0;
+      }
+      .management-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+        gap: 1rem;
+      }
+      .management-stat-card {
+        display: flex;
+        min-height: 8rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.25rem 1.4rem;
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+      .management-stat-card h2,
+      .management-stat-card h3 {
+        margin: 0 0 0.5rem;
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-weight: 600;
+      }
+      .management-stat-card .stat-value {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(1.7rem, 3vw, 2.2rem);
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .management-stat-icon {
+        display: grid;
+        width: 3rem;
+        height: 3rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 0.9rem;
+        background: var(--teal-soft);
+        color: var(--teal);
+        font-size: 1.2rem;
+      }
+      .management-section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+      }
+      .management-section-heading i {
+        color: var(--teal);
+      }
+      .management-dashboard .dashboard-card {
+        overflow: hidden;
+      }
+      .attendance-action,
+      .dashboard-search,
+      .attendance-time-card {
+        transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+      }
+      .attendance-action:not(:disabled):hover {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
+      }
+      .attendance-action.is-primary:not(:disabled):hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        color: #fff;
+      }
+      .metric-card:hover,
+      .dashboard-chart-card:hover,
+      .management-stat-card:hover {
+        border-color: #cbdcf5;
+      }
+      .attendance-time-card:hover {
+        border-color: #cbdcf5;
+        background: #eff6ff;
+      }
+      html[data-theme="dark"] .dashboard-search,
+      html[data-theme="dark"] .metric-card,
+      html[data-theme="dark"] .dashboard-chart-card,
+      html[data-theme="dark"] .attendance-panel,
+      html[data-theme="dark"] .attendance-action,
+      html[data-theme="dark"] .attendance-time-card,
+      html[data-theme="dark"] .mini-stat,
+      html[data-theme="dark"] .management-stat-card {
+        background: var(--surface);
+        color: var(--ink);
+      }
+      html[data-theme="dark"] .attendance-panel {
+        background: linear-gradient(180deg, var(--surface), var(--canvas));
+      }
+      html[data-theme="dark"] .attendance-panel::before {
+        background: linear-gradient(135deg, rgba(96, 165, 250, 0.12), rgba(14, 165, 233, 0.04));
+      }
+      html[data-theme="dark"] .attendance-action.is-muted {
+        background: #1e293b;
+        color: #94a3b8;
+      }
+      html[data-theme="dark"] .attendance-clock-button.is-disabled .attendance-ring {
+        background: #334155;
+      }
+      html[data-theme="dark"] .attendance-action:not(:disabled):not(.is-primary):hover,
+      html[data-theme="dark"] .attendance-time-card:hover {
+        border-color: #3b82f6;
+        background: #1e3a5f;
+        color: #dbeafe;
+      }
+      html[data-theme="dark"] .attendance-time-card strong {
+        color: var(--ink);
+      }
+      html[data-theme="dark"] .attendance-tag,
+      html[data-theme="dark"] .metric-card .metric-trend {
+        background: rgba(96, 165, 250, 0.14);
+        color: #93c5fd;
+      }
+      html[data-theme="dark"] .metric-card:hover,
+      html[data-theme="dark"] .dashboard-chart-card:hover,
+      html[data-theme="dark"] .management-stat-card:hover {
+        border-color: #3b82f6;
+      }
+      .app-main-shell table thead {
+        background: #f8faff !important;
+      }
+      .app-main-shell table tbody tr {
+        transition: background-color 140ms ease;
+      }
+      .app-main-shell table tbody tr:hover {
+        background: #f5f8ff;
+      }
+      .app-main-shell th {
+        padding-top: 0.9rem !important;
+        padding-bottom: 0.9rem !important;
+      }
+      .app-main-shell progress {
+        overflow: hidden;
+        border: 0;
+        border-radius: 999px;
+        background: #e7ede9;
+        accent-color: var(--teal);
+      }
+      .app-main-shell progress::-webkit-progress-bar {
+        border-radius: 999px;
+        background: #e7ede9;
+      }
+      .app-main-shell progress::-webkit-progress-value {
+        border-radius: 999px;
+        background: var(--teal);
+      }
+      .app-main-shell progress::-moz-progress-bar {
+        border-radius: 999px;
+        background: var(--teal);
+      }
+      .app-main-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+      .app-main-shell select,
+      .app-main-shell textarea {
+        min-height: 2.75rem;
+        padding-top: 0.65rem;
+        padding-right: 0.8rem;
+        padding-bottom: 0.65rem;
+        background-color: #fff;
+      }
+      .app-main-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.pl-10) {
+        padding-left: 0.8rem;
+      }
+      .app-main-shell textarea {
+        min-height: auto;
+      }
+      .app-main-shell button,
+      .app-main-shell a[class*="inline-flex"] {
+        transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+      }
+      .app-main-shell button[class~="bg-gradient-to-r"],
+      .app-main-shell a[class~="bg-gradient-to-r"] {
+        color: #fff !important;
+      }
+      .app-main-shell .overflow-x-auto {
+        border-radius: 0 0 1rem 1rem;
+      }
+      .app-main-shell article + article {
+        border-color: var(--line);
+      }
+      .auth-layout {
+        background:
+          radial-gradient(ellipse at 12% 10%, rgba(189, 232, 213, 0.62), transparent 34%),
+          radial-gradient(ellipse at 92% 88%, rgba(224, 239, 230, 0.8), transparent 35%),
+          var(--canvas);
+      }
+      .auth-card {
+        border-radius: 1.5rem !important;
+        box-shadow: 0 24px 70px rgba(23, 52, 44, 0.12) !important;
+      }
+      .auth-content > div:last-child {
+        color: var(--muted);
+      }
+      .auth-layout h2 {
+        letter-spacing: -0.045em;
       }
 
       .bg-white {
@@ -135,7 +1039,7 @@
       }
       .rounded-2xl,
       .rounded-3xl {
-        border-radius: 14px !important;
+        border-radius: 16px !important;
       }
       button[class~="bg-gradient-to-r"],
       a[class~="bg-gradient-to-r"] {
@@ -159,13 +1063,6 @@
       button {
         border-radius: 10px !important;
       }
-      form button[type="submit"] {
-        background-image: none !important;
-        background-color: var(--teal) !important;
-      }
-      form button[type="submit"]:hover {
-        background-color: var(--teal-dark) !important;
-      }
       form button[type="submit"][disabled] {
         background-color: #cbd5e1 !important;
         color: #64748b !important;
@@ -185,7 +1082,7 @@
       select:focus,
       textarea:focus {
         border-color: var(--teal) !important;
-        box-shadow: 0 0 0 3px rgba(8, 127, 120, 0.13) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14) !important;
       }
       table {
         font-size: 0.9rem;
@@ -196,15 +1093,374 @@
         letter-spacing: 0.08em !important;
       }
       footer {
-        background: rgba(255, 255, 255, 0.7) !important;
+        background: var(--surface) !important;
         border-color: var(--line) !important;
+      }
+      #profileSidebar {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      :focus-visible {
+        outline: 3px solid rgba(37, 99, 235, 0.55);
+        outline-offset: 2px;
       }
       .biometric-time {
         font-variant-numeric: tabular-nums;
         letter-spacing: 0.02em;
       }
 
+      html[data-theme="dark"] body {
+        color: var(--ink) !important;
+        background-color: var(--canvas) !important;
+      }
+      html[data-theme="dark"] .app-shell-nav {
+        background: var(--sidebar) !important;
+        border-color: var(--line) !important;
+        box-shadow: 8px 0 28px rgba(0, 0, 0, 0.16) !important;
+      }
+      html[data-theme="dark"] .app-shell-nav .app-brand {
+        color: var(--ink) !important;
+      }
+      html[data-theme="dark"] .app-shell-nav .app-brand::before {
+        background: #24483a;
+        color: #d8f2e5;
+      }
+      html[data-theme="dark"] .app-shell-nav .app-nav-link[aria-current="page"],
+      html[data-theme="dark"] .app-shell-nav .app-nav-link:hover {
+        color: #d9f5e7;
+        background: rgba(137, 213, 179, 0.13);
+      }
+      html[data-theme="dark"] .app-main-shell .dashboard-card,
+      html[data-theme="dark"] .app-main-shell .bg-white,
+      html[data-theme="dark"] .app-main-shell .bg-white\/80,
+      html[data-theme="dark"] .app-main-shell .bg-white\/50,
+      html[data-theme="dark"] #profileSidebar,
+      html[data-theme="dark"] #addStudentModal .bg-white,
+      html[data-theme="dark"] #editProfileModal .bg-white {
+        background-color: var(--surface) !important;
+        color: var(--ink);
+      }
+      html[data-theme="dark"] .app-main-shell [class~="border-gray-100"],
+      html[data-theme="dark"] .app-main-shell [class~="border-gray-200"],
+      html[data-theme="dark"] .app-main-shell [class~="border-gray-300"],
+      html[data-theme="dark"] .app-main-shell [class~="border-white"],
+      html[data-theme="dark"] #profileSidebar [class~="border-gray-100"],
+      html[data-theme="dark"] #profileSidebar [class~="border-gray-200"],
+      html[data-theme="dark"] #addStudentModal [class~="border-gray-100"],
+      html[data-theme="dark"] #addStudentModal [class~="border-gray-200"],
+      html[data-theme="dark"] #editProfileModal [class~="border-gray-100"],
+      html[data-theme="dark"] #editProfileModal [class~="border-gray-200"] {
+        border-color: var(--line) !important;
+      }
+      html[data-theme="dark"] .app-main-shell input,
+      html[data-theme="dark"] .app-main-shell select,
+      html[data-theme="dark"] .app-main-shell textarea,
+      html[data-theme="dark"] #addStudentModal input,
+      html[data-theme="dark"] #addStudentModal select,
+      html[data-theme="dark"] #addStudentModal textarea,
+      html[data-theme="dark"] #editProfileModal input,
+      html[data-theme="dark"] #editProfileModal select,
+      html[data-theme="dark"] #editProfileModal textarea {
+        background-color: #131d18 !important;
+        border-color: var(--line) !important;
+        color: var(--ink) !important;
+        color-scheme: dark;
+      }
+      html[data-theme="dark"] .app-main-shell input::placeholder,
+      html[data-theme="dark"] .app-main-shell textarea::placeholder {
+        color: #87968d;
+      }
+      html[data-theme="dark"] .app-main-shell input:focus,
+      html[data-theme="dark"] .app-main-shell select:focus,
+      html[data-theme="dark"] .app-main-shell textarea:focus {
+        border-color: var(--teal) !important;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+      }
+      html[data-theme="dark"] .app-main-shell table thead {
+        background: #1e293b !important;
+      }
+      html[data-theme="dark"] .app-main-shell table tbody tr:hover {
+        background: #1e293b;
+      }
+      html[data-theme="dark"] .app-main-shell progress,
+      html[data-theme="dark"] .app-main-shell progress::-webkit-progress-bar {
+        background: #34443b;
+      }
+      html[data-theme="dark"] .auth-layout {
+        background:
+          radial-gradient(ellipse at 12% 10%, rgba(50, 94, 73, 0.35), transparent 34%),
+          radial-gradient(ellipse at 92% 88%, rgba(34, 69, 53, 0.3), transparent 35%),
+          var(--canvas);
+      }
+      html[data-theme="dark"] .auth-card,
+      html[data-theme="dark"] .auth-layout .bg-white {
+        background-color: var(--surface) !important;
+        border-color: var(--line) !important;
+      }
+      html[data-theme="dark"] .auth-layout input,
+      html[data-theme="dark"] .auth-layout select {
+        background-color: #131d18 !important;
+        border-color: var(--line) !important;
+        color: var(--ink) !important;
+        color-scheme: dark;
+      }
+      html[data-theme="dark"] footer {
+        background: var(--surface) !important;
+        color: var(--muted);
+      }
+      html[data-theme="dark"] body [class~="bg-gray-50"],
+      html[data-theme="dark"] body [class~="bg-gray-100"],
+      html[data-theme="dark"] body [class~="bg-slate-50"],
+      html[data-theme="dark"] body [class~="bg-slate-100"],
+      html[data-theme="dark"] #mobile-menu {
+        background-color: #1e293b !important;
+      }
+      html[data-theme="dark"] body [class~="bg-teal-50"],
+      html[data-theme="dark"] body [class~="bg-emerald-50"],
+      html[data-theme="dark"] body [class~="bg-green-50"],
+      html[data-theme="dark"] body [class~="bg-sky-50"],
+      html[data-theme="dark"] body [class~="bg-blue-50"] {
+        background-color: #132a3d !important;
+      }
+      html[data-theme="dark"] body [class~="bg-teal-100"],
+      html[data-theme="dark"] body [class~="bg-emerald-100"],
+      html[data-theme="dark"] body [class~="bg-green-100"],
+      html[data-theme="dark"] body [class~="bg-blue-100"],
+      html[data-theme="dark"] body [class~="bg-cyan-100"],
+      html[data-theme="dark"] body [class~="bg-indigo-100"],
+      html[data-theme="dark"] body [class~="bg-purple-100"] {
+        background-color: #1e3a5f !important;
+      }
+      html[data-theme="dark"] body [class~="bg-amber-50"],
+      html[data-theme="dark"] body [class~="bg-yellow-50"] {
+        background-color: #3b301a !important;
+      }
+      html[data-theme="dark"] body [class~="bg-amber-100"],
+      html[data-theme="dark"] body [class~="bg-yellow-100"] {
+        background-color: #4a3b18 !important;
+      }
+      html[data-theme="dark"] body [class~="bg-red-50"],
+      html[data-theme="dark"] body [class~="bg-rose-50"] {
+        background-color: #402724 !important;
+      }
+      html[data-theme="dark"] body [class~="bg-red-100"],
+      html[data-theme="dark"] body [class~="bg-rose-100"] {
+        background-color: #512e2a !important;
+      }
+      html[data-theme="dark"] body [class~="text-gray-900"],
+      html[data-theme="dark"] body [class~="text-gray-800"] {
+        color: var(--ink) !important;
+      }
+      html[data-theme="dark"] body [class~="text-gray-700"],
+      html[data-theme="dark"] body [class~="text-gray-600"],
+      html[data-theme="dark"] body [class~="text-gray-500"] {
+        color: var(--muted) !important;
+      }
+      html[data-theme="dark"] body :is(
+        [class~="text-teal-500"], [class~="text-teal-600"], [class~="text-teal-700"], [class~="text-teal-800"], [class~="text-teal-900"],
+        [class~="text-emerald-500"], [class~="text-emerald-600"], [class~="text-emerald-700"], [class~="text-emerald-800"], [class~="text-emerald-900"],
+        [class~="text-green-500"], [class~="text-green-600"], [class~="text-green-700"], [class~="text-green-800"], [class~="text-green-900"]
+      ) {
+        color: #5eead4 !important;
+      }
+      html[data-theme="dark"] body :is(
+        [class~="text-blue-500"], [class~="text-blue-600"], [class~="text-blue-700"], [class~="text-blue-800"], [class~="text-blue-900"],
+        [class~="text-sky-500"], [class~="text-sky-600"], [class~="text-sky-700"], [class~="text-sky-800"], [class~="text-sky-900"],
+        [class~="text-indigo-500"], [class~="text-indigo-600"], [class~="text-indigo-700"], [class~="text-indigo-800"], [class~="text-indigo-900"],
+        [class~="text-purple-500"], [class~="text-purple-600"], [class~="text-purple-700"], [class~="text-purple-800"], [class~="text-purple-900"],
+        [class~="text-cyan-500"], [class~="text-cyan-600"], [class~="text-cyan-700"], [class~="text-cyan-800"], [class~="text-cyan-900"]
+      ) {
+        color: #93c5fd !important;
+      }
+      html[data-theme="dark"] body :is(
+        [class~="text-amber-500"], [class~="text-amber-600"], [class~="text-amber-700"], [class~="text-amber-800"], [class~="text-amber-900"],
+        [class~="text-yellow-500"], [class~="text-yellow-600"], [class~="text-yellow-700"], [class~="text-yellow-800"], [class~="text-yellow-900"],
+        [class~="text-orange-500"], [class~="text-orange-600"], [class~="text-orange-700"], [class~="text-orange-800"], [class~="text-orange-900"]
+      ) {
+        color: #f2ce78 !important;
+      }
+      html[data-theme="dark"] body :is(
+        [class~="text-red-500"], [class~="text-red-600"], [class~="text-red-700"], [class~="text-red-800"], [class~="text-red-900"],
+        [class~="text-rose-500"], [class~="text-rose-600"], [class~="text-rose-700"], [class~="text-rose-800"], [class~="text-rose-900"]
+      ) {
+        color: #f0a59a !important;
+      }
+      html[data-theme="dark"] body .group:hover :is(
+        [class~="group-hover:text-blue-500"], [class~="group-hover:text-blue-600"],
+        [class~="group-hover:text-purple-500"], [class~="group-hover:text-purple-600"]
+      ) {
+        color: #93c5fd !important;
+      }
+      html[data-theme="dark"] body .group:hover :is(
+        [class~="group-hover:text-emerald-500"], [class~="group-hover:text-emerald-600"]
+      ) {
+        color: #5eead4 !important;
+      }
+      html[data-theme="dark"] body :is(
+        [class~="hover:text-blue-500"], [class~="hover:text-blue-600"]
+      ):hover {
+        color: #93c5fd !important;
+      }
+      html[data-theme="dark"] body [class~="hover:text-green-500"]:hover {
+        color: #5eead4 !important;
+      }
+      html[data-theme="dark"] body [class~="hover:text-red-800"]:hover {
+        color: #f0a59a !important;
+      }
+      html[data-theme="dark"] body [class*="from-gray-50"],
+      html[data-theme="dark"] body [class*="to-slate-50"],
+      html[data-theme="dark"] body [class*="from-green-50"],
+      html[data-theme="dark"] body [class*="to-emerald-50"] {
+        background-image: none !important;
+        background-color: #1e293b !important;
+      }
+      html[data-theme="dark"] .app-main-shell .dashboard-card,
+      html[data-theme="dark"] .app-main-shell .metric-card,
+      html[data-theme="dark"] .app-main-shell .dashboard-chart-card,
+      html[data-theme="dark"] .app-main-shell .attendance-panel,
+      html[data-theme="dark"] .app-main-shell .management-stat-card,
+      html[data-theme="dark"] .app-main-shell .bg-white,
+      html[data-theme="dark"] .app-main-shell .bg-white\/50,
+      html[data-theme="dark"] .app-main-shell .bg-white\/80,
+      html[data-theme="dark"] #profileSidebar,
+      html[data-theme="dark"] #addStudentModal .bg-white,
+      html[data-theme="dark"] #editProfileModal .bg-white {
+        background-color: var(--surface) !important;
+        color: var(--ink);
+      }
+      html[data-theme="dark"] .app-main-shell .dashboard-card,
+      html[data-theme="dark"] .app-main-shell .metric-card,
+      html[data-theme="dark"] .app-main-shell .dashboard-chart-card,
+      html[data-theme="dark"] .app-main-shell .attendance-panel,
+      html[data-theme="dark"] .app-main-shell .management-stat-card,
+      html[data-theme="dark"] .app-main-shell .dashboard-search,
+      html[data-theme="dark"] .app-main-shell .mini-stat {
+        border-color: var(--line);
+      }
+      html[data-theme="dark"] .app-main-shell table thead,
+      html[data-theme="dark"] .app-main-shell [class~="bg-gray-50"],
+      html[data-theme="dark"] .app-main-shell [class~="bg-gray-100"],
+      html[data-theme="dark"] .app-main-shell [class~="bg-slate-50"],
+      html[data-theme="dark"] .app-main-shell [class~="bg-slate-100"] {
+        background-color: #1e293b !important;
+      }
+      html[data-theme="dark"] .app-main-shell table tbody tr:hover {
+        background-color: #1e293b;
+      }
+      html[data-theme="dark"] .app-main-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+      html[data-theme="dark"] .app-main-shell select,
+      html[data-theme="dark"] .app-main-shell textarea {
+        background-color: #0f172a !important;
+        border-color: var(--line) !important;
+        color: var(--ink) !important;
+        color-scheme: dark;
+      }
+      html[data-theme="dark"] .app-main-shell input::placeholder,
+      html[data-theme="dark"] .app-main-shell textarea::placeholder {
+        color: #94a3b8;
+      }
+      html[data-theme="dark"] .app-shell-nav {
+        background: var(--sidebar) !important;
+      }
+      html[data-theme="dark"] .app-shell-nav .app-brand::before {
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        color: #fff;
+      }
+      html[data-theme="dark"] .app-shell-nav .app-nav-link[aria-current="page"],
+      html[data-theme="dark"] .app-shell-nav .app-nav-link:hover {
+        color: #eff6ff;
+        background: rgba(96, 165, 250, 0.16);
+      }
+      html[data-theme="dark"] .app-shell-nav #mobile-menu {
+        background: var(--surface) !important;
+      }
+      html[data-theme="dark"] .auth-layout {
+        background: var(--canvas);
+      }
+      html[data-theme="dark"] .app-main-shell progress,
+      html[data-theme="dark"] .app-main-shell progress::-webkit-progress-bar {
+        background: #334155;
+      }
+
       @media (max-width: 767px) {
+        .app-shell-nav {
+          position: sticky;
+          width: 100%;
+          height: auto;
+          background: var(--sidebar) !important;
+        }
+        .app-shell-nav .max-w-7xl {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+        .app-shell-nav .app-nav-row {
+          min-height: 4rem;
+          height: 4rem;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+          padding: 0;
+        }
+        .app-shell-nav .app-brand-wrap {
+          padding: 0;
+        }
+        .app-shell-nav .app-brand {
+          color: #fff !important;
+        }
+        .app-shell-nav .app-brand::before {
+          background: linear-gradient(135deg, #60a5fa, #2563eb);
+          color: #fff;
+        }
+        .app-shell-nav .app-desktop-navigation {
+          display: none;
+        }
+        .app-shell-nav .app-nav-link {
+          color: var(--sidebar-muted);
+        }
+        .app-shell-nav .app-nav-link:hover,
+        .app-shell-nav .app-nav-link[aria-current="page"] {
+          color: #f8fbff;
+          background: rgba(96, 165, 250, 0.14);
+        }
+        .auth-layout {
+          padding-top: 1.5rem !important;
+          padding-bottom: 1.5rem !important;
+        }
+        .auth-card {
+          padding: 1.5rem !important;
+          border-radius: 1.25rem !important;
+        }
+        .app-shell-nav #mobile-menu {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          left: 0;
+          max-height: calc(100vh - 4rem);
+          overflow-y: auto;
+          border-bottom: 1px solid var(--line);
+          background: #fff;
+          box-shadow: 0 18px 28px rgba(23, 39, 34, 0.12);
+        }
+        .app-authenticated .app-main-shell,
+        .app-authenticated > footer {
+          margin-left: 0;
+        }
+        .app-authenticated .app-main-shell,
+        .app-authenticated > footer {
+          width: 100%;
+        }
+        .app-main-shell .max-w-7xl,
+        .app-main-shell .max-w-6xl,
+        .app-main-shell .max-w-5xl,
+        .app-main-shell .max-w-4xl {
+          max-width: 100%;
+        }
+        .app-main-shell main,
+        .app-main-shell > div > div.max-w-7xl {
+          padding-top: 1.25rem;
+          padding-bottom: 2rem;
+        }
         nav .max-w-7xl {
           padding-left: 1rem;
           padding-right: 1rem;
@@ -213,26 +1469,18 @@
           height: 3.75rem;
         }
         body {
-          padding-bottom: 3.75rem;
-        }
-        body > footer {
-          position: fixed;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 30;
+          padding-bottom: 0;
         }
         body > footer .py-6 {
           padding-top: 0.8rem !important;
           padding-bottom: 0.8rem !important;
         }
-        nav a:first-child {
-          font-size: 1.25rem !important;
-        }
+        .app-brand { font-size: 1.15rem !important; }
         body > div,
         body > main {
           width: 100%;
         }
+
         .min-h-screen.py-8 {
           padding-top: 1.25rem !important;
           padding-bottom: 1.25rem !important;
@@ -265,9 +1513,6 @@
         .overflow-x-auto {
           -webkit-overflow-scrolling: touch;
         }
-        table {
-          min-width: 640px;
-        }
         #profileSidebar {
           width: min(88vw, 22rem);
         }
@@ -283,51 +1528,102 @@
           flex: 1 1 10rem;
           justify-content: center;
         }
+        .page-header {
+          align-items: flex-start;
+          flex-direction: column;
+          margin-bottom: 1.25rem;
+        }
+        .page-header > :last-child {
+          width: 100%;
+        }
+        .app-nav-link {
+          width: 100%;
+          min-height: 2.75rem;
+          padding: 0.65rem 0.75rem;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .app-shell-nav {
+          position: fixed;
+          inset: 0 auto 0 0;
+          width: 16rem;
+          height: 100vh;
+          overflow-y: auto;
+          background: var(--sidebar) !important;
+          border: 0 !important;
+          box-shadow: 8px 0 28px rgba(18, 45, 36, 0.08) !important;
+          color: #fff;
+        }
       }
     </style>
     {% block head %}{% endblock %}
   </head>
-  <body
-    class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen"
-  >
+  <body class="min-h-screen{% if current_user.is_authenticated %} app-authenticated{% endif %}">
     {% block navbar %}
     <!-- Navigation -->
     <nav
-      class="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50"
+      aria-label="Main navigation"
+      class="app-shell-nav bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50 z-50"
     >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center">
+      <div class="app-nav-frame max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="app-nav-row flex justify-between items-center h-16">
+          <div class="app-brand-wrap flex items-center">
             <a
               href="{{ url_for('index') }}"
-              class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+              class="app-brand text-xl font-bold text-teal-700"
             >
               SIP Tracker
             </a>
           </div>
 
-          <div class="hidden md:block">
-            <div class="ml-10 flex items-baseline space-x-4">
+          <div class="app-desktop-navigation hidden md:block">
+            <div class="app-nav-links ml-10 flex items-baseline space-x-4">
               {% if current_user.is_authenticated %}
-              <div class="flex items-center space-x-3">
-                <div class="flex items-center space-x-2 text-gray-600">
-                  <!--i class="fas fa-user-circle text-lg"></i>
-                    <span class="font-medium">{{ current_user.username }}</span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {{ current_user.role|default('user') }}
-                    </span-->
+              {% if current_user.role == 'student' %}
+              <a href="{{ url_for('dashboard') }}" class="app-nav-link" {% if request.endpoint == 'dashboard' %}aria-current="page"{% endif %}><i class="fas fa-house mr-2" aria-hidden="true"></i>Dashboard</a>
+              <a href="{{ url_for('records') }}" class="app-nav-link" {% if request.endpoint == 'records' %}aria-current="page"{% endif %}><i class="fas fa-clock-rotate-left mr-2" aria-hidden="true"></i>Time records</a>
+              <a href="{{ url_for('attendance_requests') }}" class="app-nav-link" {% if request.endpoint in ['attendance_requests', 'review_attendance_request'] %}aria-current="page"{% endif %}><i class="fas fa-clipboard-check mr-2" aria-hidden="true"></i>Requests</a>
+              <a href="{{ url_for('messages') }}" class="app-nav-link" {% if request.endpoint == 'messages' %}aria-current="page"{% endif %}><i class="fas fa-comments mr-2" aria-hidden="true"></i>Messages{% if unread_message_count %}<span class="ml-2 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-900">{{ unread_message_count }}</span>{% endif %}</a>
+              {% elif current_user.role == 'supervisor' %}
+              <a href="{{ url_for('supervisor_dashboard') }}" class="app-nav-link" {% if request.endpoint == 'supervisor_dashboard' %}aria-current="page"{% endif %}><i class="fas fa-users mr-2" aria-hidden="true"></i>Students</a>
+              <a href="{{ url_for('attendance_requests') }}" class="app-nav-link" {% if request.endpoint in ['attendance_requests', 'review_attendance_request'] %}aria-current="page"{% endif %}><i class="fas fa-clipboard-check mr-2" aria-hidden="true"></i>Requests</a>
+              <a href="{{ url_for('messages') }}" class="app-nav-link" {% if request.endpoint == 'messages' %}aria-current="page"{% endif %}><i class="fas fa-comments mr-2" aria-hidden="true"></i>Messages{% if unread_message_count %}<span class="ml-2 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-900">{{ unread_message_count }}</span>{% endif %}</a>
+              {% elif current_user.role == 'sip_center_supervisor' %}
+              <a href="{{ url_for('sip_center_supervisor_dashboard') }}" class="app-nav-link" {% if request.endpoint == 'sip_center_supervisor_dashboard' %}aria-current="page"{% endif %}><i class="fas fa-building mr-2" aria-hidden="true"></i>Center overview</a>
+              {% elif current_user.role == 'admin' %}
+              <a href="{{ url_for('admin_dashboard') }}" class="app-nav-link" {% if request.endpoint == 'admin_dashboard' %}aria-current="page"{% endif %}><i class="fas fa-users-cog mr-2" aria-hidden="true"></i>Users</a>
+              <a href="{{ url_for('admin_policy') }}" class="app-nav-link" {% if request.endpoint in ['admin_policy', 'admin_delete_holiday'] %}aria-current="page"{% endif %}><i class="fas fa-sliders mr-2" aria-hidden="true"></i>Policy</a>
+              <a href="{{ url_for('admin_audit') }}" class="app-nav-link" {% if request.endpoint == 'admin_audit' %}aria-current="page"{% endif %}><i class="fas fa-list-check mr-2" aria-hidden="true"></i>Audit</a>
+              {% endif %}
+              <a href="{{ url_for('notifications') }}" class="app-nav-link" {% if request.endpoint in ['notifications', 'mark_notification_read'] %}aria-current="page"{% endif %}><i class="fas fa-bell mr-2" aria-hidden="true"></i>Alerts{% if unread_notification_count %}<span class="ml-2 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-900">{{ unread_notification_count }}</span>{% endif %}</a>
+              <div class="app-nav-actions flex items-center space-x-3">
+                <div class="app-user-summary">
+                  <span class="app-user-avatar" aria-hidden="true"><i class="fas fa-user"></i></span>
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm font-semibold">{{ current_user.username }}</span>
+                    <span class="block">{{ current_user.role|replace('_', ' ')|title }}</span>
+                  </span>
                 </div>
+                <button type="button" class="theme-toggle app-theme-toggle" data-theme-toggle aria-pressed="false">
+                  <i class="fas fa-moon theme-icon-light" aria-hidden="true"></i>
+                  <i class="fas fa-sun theme-icon-dark" aria-hidden="true"></i>
+                  <span data-theme-label>Dark mode</span>
+                </button>
                 {% if current_user.role in ['supervisor',
                 'sip_center_supervisor'] %}
                 <button
+                  type="button"
                   onclick="openAddStudentModal()"
-                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
+                  class="app-add-student-action inline-flex min-h-10 items-center rounded-lg border border-transparent px-3 text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
                 >
                   <i class="fas fa-user-plus mr-2"></i>Add Student
                 </button>
                 {% endif %}
                 <button
+                  type="button"
                   onclick="toggleProfileSidebar()"
+                  aria-controls="profileSidebar"
                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   <i class="fas fa-user mr-2"></i>Profile
@@ -351,6 +1647,11 @@
                 </form>
               </div>
               {% else %}
+              <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+                <i class="fas fa-moon theme-icon-light" aria-hidden="true"></i>
+                <i class="fas fa-sun theme-icon-dark" aria-hidden="true"></i>
+                <span data-theme-label>Dark mode</span>
+              </button>
               <a
                 href="{{ url_for('login') }}"
                 class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -371,12 +1672,13 @@
           <div class="md:hidden">
             <button
               type="button"
-              class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              class="bg-white inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-600"
               aria-controls="mobile-menu"
               aria-expanded="false"
+              id="mobile-menu-toggle"
               onclick="toggleMobileMenu()"
             >
-              <span class="sr-only">Open main menu</span>
+              <span class="sr-only">Open navigation menu</span>
               <i class="fas fa-bars text-xl"></i>
             </button>
           </div>
@@ -397,20 +1699,44 @@
               {{ current_user.role|default('user') }}
             </span>
           </div>
+          <button type="button" class="theme-toggle app-theme-toggle" data-theme-toggle aria-pressed="false">
+            <i class="fas fa-moon theme-icon-light" aria-hidden="true"></i>
+            <i class="fas fa-sun theme-icon-dark" aria-hidden="true"></i>
+            <span data-theme-label>Dark mode</span>
+          </button>
+          {% if current_user.role == 'student' %}
+          <a href="{{ url_for('dashboard') }}" class="app-nav-link" {% if request.endpoint == 'dashboard' %}aria-current="page"{% endif %}><i class="fas fa-house mr-2" aria-hidden="true"></i>Dashboard</a>
+          <a href="{{ url_for('records') }}" class="app-nav-link" {% if request.endpoint == 'records' %}aria-current="page"{% endif %}><i class="fas fa-clock-rotate-left mr-2" aria-hidden="true"></i>Time records</a>
+          <a href="{{ url_for('attendance_requests') }}" class="app-nav-link" {% if request.endpoint in ['attendance_requests', 'review_attendance_request'] %}aria-current="page"{% endif %}><i class="fas fa-clipboard-check mr-2" aria-hidden="true"></i>Requests</a>
+          <a href="{{ url_for('messages') }}" class="app-nav-link" {% if request.endpoint == 'messages' %}aria-current="page"{% endif %}><i class="fas fa-comments mr-2" aria-hidden="true"></i>Messages{% if unread_message_count %} ({{ unread_message_count }}){% endif %}</a>
+          {% elif current_user.role == 'supervisor' %}
+          <a href="{{ url_for('supervisor_dashboard') }}" class="app-nav-link" {% if request.endpoint == 'supervisor_dashboard' %}aria-current="page"{% endif %}><i class="fas fa-users mr-2" aria-hidden="true"></i>Students</a>
+          <a href="{{ url_for('attendance_requests') }}" class="app-nav-link" {% if request.endpoint in ['attendance_requests', 'review_attendance_request'] %}aria-current="page"{% endif %}><i class="fas fa-clipboard-check mr-2" aria-hidden="true"></i>Requests</a>
+          <a href="{{ url_for('messages') }}" class="app-nav-link" {% if request.endpoint == 'messages' %}aria-current="page"{% endif %}><i class="fas fa-comments mr-2" aria-hidden="true"></i>Messages{% if unread_message_count %} ({{ unread_message_count }}){% endif %}</a>
+          {% elif current_user.role == 'sip_center_supervisor' %}
+          <a href="{{ url_for('sip_center_supervisor_dashboard') }}" class="app-nav-link" {% if request.endpoint == 'sip_center_supervisor_dashboard' %}aria-current="page"{% endif %}><i class="fas fa-building mr-2" aria-hidden="true"></i>Center overview</a>
+          {% elif current_user.role == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}" class="app-nav-link" {% if request.endpoint == 'admin_dashboard' %}aria-current="page"{% endif %}><i class="fas fa-users-cog mr-2" aria-hidden="true"></i>Users</a>
+          <a href="{{ url_for('admin_policy') }}" class="app-nav-link" {% if request.endpoint in ['admin_policy', 'admin_delete_holiday'] %}aria-current="page"{% endif %}><i class="fas fa-sliders mr-2" aria-hidden="true"></i>Policy</a>
+          <a href="{{ url_for('admin_audit') }}" class="app-nav-link" {% if request.endpoint == 'admin_audit' %}aria-current="page"{% endif %}><i class="fas fa-list-check mr-2" aria-hidden="true"></i>Audit</a>
+          {% endif %}
+          <a href="{{ url_for('notifications') }}" class="app-nav-link" {% if request.endpoint in ['notifications', 'mark_notification_read'] %}aria-current="page"{% endif %}><i class="fas fa-bell mr-2" aria-hidden="true"></i>Notifications{% if unread_notification_count %} ({{ unread_notification_count }} unread){% endif %}</a>
           {% if current_user.role in ['supervisor', 'sip_center_supervisor'] %}
           <button
             onclick="
               toggleMobileMenu();
               openAddStudentModal();
             "
-            class="block w-full text-left px-3 py-2 text-base font-medium text-emerald-700 hover:bg-emerald-50 rounded-md"
+            class="app-nav-link w-full text-left text-teal-800"
           >
             <i class="fas fa-user-plus mr-2"></i>Add Student
           </button>
           {% endif %}
           <button
+            type="button"
             onclick="toggleProfileSidebar()"
-            class="block w-full text-left px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 rounded-md"
+            aria-controls="profileSidebar"
+            class="app-nav-link w-full text-left"
           >
             <i class="fas fa-user mr-2"></i>Profile
           </button>
@@ -422,12 +1748,17 @@
             />
             <button
               type="submit"
-              class="block px-3 py-2 text-base font-medium text-red-600 hover:text-red-500 hover:bg-red-50 rounded-md"
+              class="app-nav-link w-full text-left text-red-700"
             >
               <i class="fas fa-sign-out-alt mr-2"></i>Logout
             </button>
           </form>
           {% else %}
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <i class="fas fa-moon theme-icon-light" aria-hidden="true"></i>
+            <i class="fas fa-sun theme-icon-dark" aria-hidden="true"></i>
+            <span data-theme-label>Dark mode</span>
+          </button>
           <a
             href="{{ url_for('login') }}"
             class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-500 hover:bg-gray-50 rounded-md"
@@ -444,7 +1775,9 @@
         </div>
       </div>
     </nav>
-    {% endblock %} {% block global_flashes %}
+    {% endblock %}
+    <div class="app-main-shell">
+    {% block global_flashes %}
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %} {% if
     messages %}
@@ -470,9 +1803,9 @@
       </div>
       {% endfor %}
     </div>
-    {% endif %} {% endwith %} {% endblock %} {% block body %}{% endblock %} {%
-    if current_user.is_authenticated and current_user.role in ['supervisor',
-    'sip_center_supervisor'] %}
+    {% endif %} {% endwith %} {% endblock %} {% block body %}{% endblock %}
+    </div>
+    {% if current_user.is_authenticated and current_user.role in ['supervisor', 'sip_center_supervisor'] %}
     <!-- Add Student Modal -->
     <div
       id="addStudentOverlay"
@@ -516,12 +1849,13 @@
               id="studentUsernameInput"
               list="studentUsernameList"
               placeholder="Search or type a username"
+              autocomplete="off"
               class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               required
             />
             <datalist id="studentUsernameList"></datalist>
             <p id="studentLookupHint" class="text-xs text-gray-500 mt-2">
-              Start typing to search. List auto-loads on open.
+              Type at least two characters to find eligible students.
             </p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -546,6 +1880,18 @@
                 class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Internship hour target</label>
+            <input
+              type="number"
+              name="target_hours"
+              min="1"
+              max="10000"
+              step="0.5"
+              value="400"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl"
+            />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2"
@@ -618,6 +1964,21 @@
               value="{{ current_user.username }}"
               class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Email for reminders</label>
+            <input
+              type="email"
+              name="email"
+              value="{{ current_user.email or '' }}"
+              placeholder="you@example.com"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-xl"
+            />
+            <label class="mt-2 inline-flex min-h-11 items-center gap-2 text-sm text-gray-600">
+              <input type="checkbox" name="email_notifications" value="on" {% if current_user.email_notifications %}checked{% endif %}>
+              Send alerts to this email
+            </label>
           </div>
 
           <div>
@@ -715,21 +2076,6 @@
           </span>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
-          <h5 class="text-sm font-medium text-gray-600 mb-3">Quick Stats</h5>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="text-center">
-              <div class="text-2xl font-bold text-blue-600">0</div>
-              <div class="text-xs text-gray-500">Total Hours</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-green-600">0</div>
-              <div class="text-xs text-gray-500">Attendance %</div>
-            </div>
-          </div>
-        </div>
-
         <!-- Navigation Menu -->
         <div class="space-y-2">
           <h5 class="text-sm font-medium text-gray-600 mb-3">Quick Actions</h5>
@@ -801,7 +2147,7 @@
 
     <!-- Footer -->
     <footer
-      class="bg-white/50 backdrop-blur-sm border-t border-gray-200/50 mt-auto"
+      class="app-shell-footer bg-white/50 backdrop-blur-sm border-t border-gray-200/50 mt-auto"
     >
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div class="text-center text-gray-500 text-sm">
@@ -811,42 +2157,103 @@
     </footer>
 
     <script>
+      function setColorTheme(theme, persist) {
+        const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = normalizedTheme;
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+          const label = normalizedTheme === 'dark' ? 'Light mode' : 'Dark mode';
+          button.setAttribute('aria-pressed', String(normalizedTheme === 'dark'));
+          button.setAttribute('aria-label', `Switch to ${label.toLowerCase()}`);
+          const text = button.querySelector('[data-theme-label]');
+          if (text) text.textContent = label;
+        });
+        if (persist) {
+          try {
+            localStorage.setItem('sip-tracker-theme', normalizedTheme);
+          } catch (error) {
+            console.warn('Theme preference could not be saved to local storage.', error);
+          }
+        }
+      }
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          setColorTheme(nextTheme, true);
+        });
+      });
+      setColorTheme(document.documentElement.dataset.theme, false);
+
       document.getElementById('year').textContent = new Date().getFullYear();
 
       function toggleMobileMenu() {
         const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenu.classList.toggle('hidden');
+        const menuButton = document.getElementById('mobile-menu-toggle');
+        const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+        menuButton.setAttribute('aria-expanded', String(!isExpanded));
+        mobileMenu.classList.toggle('hidden', isExpanded);
+        menuButton.querySelector('.sr-only').textContent = isExpanded
+          ? 'Open navigation menu'
+          : 'Close navigation menu';
       }
 
       // Add Student Modal logic
       async function openAddStudentModal() {
         const modal = document.getElementById('addStudentModal');
         const overlay = document.getElementById('addStudentOverlay');
-        const list = document.getElementById('studentUsernameList');
         const alertBox = document.getElementById('addStudentAlert');
         if (alertBox) {
           alertBox.className = 'hidden px-4 py-3 rounded-xl text-sm';
           alertBox.textContent = '';
         }
-        if (list && list.options.length === 0) {
-          try {
-            const resp = await fetch('{{ url_for('students_list') }}');
-            if (resp.ok) {
-              const data = await resp.json();
-              list.innerHTML = '';
-              (data || []).forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.username;
-                list.appendChild(opt);
-              });
-            }
-          } catch (e) {
-            console.error('Failed to load students', e);
-          }
-        }
         modal.classList.remove('hidden');
         overlay.classList.remove('hidden');
         document.getElementById('studentUsernameInput')?.focus();
+      }
+
+      const studentLookupInput = document.getElementById('studentUsernameInput');
+      const studentLookupList = document.getElementById('studentUsernameList');
+      const studentLookupHint = document.getElementById('studentLookupHint');
+      let studentLookupTimer;
+      let studentLookupController;
+      if (studentLookupInput && studentLookupList) {
+        studentLookupInput.addEventListener('input', function () {
+          clearTimeout(studentLookupTimer);
+          if (studentLookupController) studentLookupController.abort();
+          const query = studentLookupInput.value.trim();
+          studentLookupList.replaceChildren();
+          if (query.length < 2) {
+            if (studentLookupHint) studentLookupHint.textContent = 'Type at least two characters to find eligible students.';
+            return;
+          }
+          studentLookupTimer = setTimeout(async function () {
+            studentLookupController = new AbortController();
+            if (studentLookupHint) studentLookupHint.textContent = 'Searching eligible students…';
+            try {
+              const response = await fetch(
+                `{{ url_for('students_list') }}?q=${encodeURIComponent(query)}`,
+                { signal: studentLookupController.signal, headers: { Accept: 'application/json' } }
+              );
+              if (!response.ok) throw new Error(`Student search failed (${response.status}).`);
+              const students = await response.json();
+              studentLookupList.replaceChildren(...students.map(function (student) {
+                const option = document.createElement('option');
+                option.value = student.username;
+                return option;
+              }));
+              if (studentLookupHint) {
+                studentLookupHint.textContent = students.length
+                  ? `${students.length === 30 ? 'Showing the first 30' : students.length} eligible match${students.length === 1 ? '' : 'es'}.`
+                  : 'No eligible students match that search.';
+              }
+            } catch (error) {
+              if (error.name !== 'AbortError') {
+                console.error(error);
+                if (studentLookupHint) studentLookupHint.textContent = 'Could not search students. Please try again.';
+              }
+            }
+          }, 250);
+        });
       }
 
       function closeAddStudentModal() {

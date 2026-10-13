@@ -3,4 +3,5 @@ Flask-Login>=0.6,<1
 Flask-SQLAlchemy>=3.1,<4
 Pillow>=10,<13
 reportlab>=4,<5
+tzdata>=2025.1
 pytest>=8,<9

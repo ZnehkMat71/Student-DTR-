@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Attendance requests · SIP Tracker{% endblock %}
+{% block body %}
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <header class="page-header"><div><p class="text-sm font-semibold uppercase tracking-wide text-teal-700">Attendance workflow</p><h1 class="font-bold text-gray-900">Attendance requests</h1><p>{% if is_supervisor %}Review attendance corrections, missed lunch punches, and absence requests from your assigned students.{% else %}Request a correction, report a missed lunch punch, or request an absence and track supervisor decisions.{% endif %}</p></div></header>
+  {% if not is_supervisor %}
+  <section class="dashboard-card mb-6 p-5 sm:p-6">
+    <h2 class="mb-4 text-lg font-semibold text-gray-900">Submit a request</h2>
+    <form method="post" class="grid gap-4 sm:grid-cols-2">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Request type</span><select name="request_type" id="request-type" required class="w-full"><option value="correction" {% if prefill_type == 'correction' %}selected{% endif %}>Correct attendance record</option><option value="lunch_correction" {% if prefill_type == 'lunch_correction' %}selected{% endif %}>Report missed lunch punches</option><option value="absence">Request absence</option></select></label>
+      <label class="block"><span class="mb-1 block text-sm font-medium text-gray-700">Date</span><input required type="date" name="requested_date" value="{{ prefill_date }}" max="2099-12-31" class="w-full"></label>
+      <label id="attendance-record-field" class="block sm:col-span-2"><span class="mb-1 block text-sm font-medium text-gray-700">Record to correct (optional for missing record)</span><select id="attendance-id" name="attendance_id" class="w-full"><option value="">No existing record</option>{% for record in records %}<option value="{{ record.id }}" {% if prefill_attendance_id|string == record.id|string %}selected{% endif %}>{{ record.work_date or (record.time_in.date() if record.time_in else 'Date not set') }} — {{ record.time_in.strftime('%I:%M %p') if record.time_in else 'No clock-in' }}{% if record.time_out %} to {{ record.time_out.strftime('%I:%M %p') }}{% endif %}</option>{% endfor %}</select></label>
+      <label class="correction-field block"><span class="mb-1 block text-sm font-medium text-gray-700">Requested clock-in</span><input type="datetime-local" name="requested_time_in" class="w-full"></label>
+      <label class="correction-field block"><span class="mb-1 block text-sm font-medium text-gray-700">Requested clock-out</span><input type="datetime-local" name="requested_time_out" class="w-full"></label>
+      <label class="lunch-correction-field block"><span class="mb-1 block text-sm font-medium text-gray-700">Actual lunch time-out</span><input type="datetime-local" name="requested_lunch_start" class="w-full"></label>
+      <label class="lunch-correction-field block"><span class="mb-1 block text-sm font-medium text-gray-700">Actual afternoon time-in</span><input type="datetime-local" name="requested_lunch_end" class="w-full"></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-sm font-medium text-gray-700">Reason</span><textarea required maxlength="1000" rows="3" name="reason" class="w-full" placeholder="Explain why this correction or absence is needed…"></textarea></label>
+      <div class="sm:col-span-2 flex justify-end"><button class="min-h-11 rounded-lg bg-teal-700 px-5 font-semibold text-white hover:bg-teal-800">Submit request</button></div>
+    </form>
+  </section>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const type = document.getElementById('request-type');
+      const correctionFields = document.querySelectorAll('.correction-field');
+      const lunchCorrectionFields = document.querySelectorAll('.lunch-correction-field');
+      const recordField = document.getElementById('attendance-record-field');
+      const attendanceId = document.getElementById('attendance-id');
+      function updateRequestFields() {
+        const isCorrection = type.value === 'correction';
+        const isLunchCorrection = type.value === 'lunch_correction';
+        correctionFields.forEach((field) => { field.classList.toggle('hidden', !isCorrection); });
+        lunchCorrectionFields.forEach((field) => { field.classList.toggle('hidden', !isLunchCorrection); });
+        recordField.classList.toggle('hidden', !(isCorrection || isLunchCorrection));
+        attendanceId.required = isLunchCorrection;
+      }
+      type.addEventListener('change', updateRequestFields);
+      updateRequestFields();
+    });
+  </script>
+  {% endif %}
+  <section class="dashboard-card overflow-hidden">
+    <div class="border-b border-gray-100 px-5 py-4"><h2 class="text-lg font-semibold text-gray-900">{% if is_supervisor %}Review queue{% else %}Your requests{% endif %}</h2></div>
+    {% if requests %}
+    <div class="divide-y divide-gray-100">
+      {% for item in requests %}
+      <article class="p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div class="flex flex-wrap items-center gap-2"><h3 class="font-semibold text-gray-900">{{ 'Missed lunch punches' if item.request_type == 'lunch_correction' else item.request_type|title }} · {{ item.requested_date.strftime('%b %d, %Y') }}</h3><span class="rounded-full px-2.5 py-1 text-xs font-semibold {% if item.status == 'approved' %}bg-emerald-100 text-emerald-800{% elif item.status == 'rejected' %}bg-red-100 text-red-800{% else %}bg-amber-100 text-amber-900{% endif %}">{{ item.status|title }}</span></div>
+            {% if is_supervisor %}<p class="mt-1 text-sm text-gray-600">From {{ students.get(item.student_id).username if students.get(item.student_id) else 'Former student' }}</p>{% endif %}
+            {% if item.request_type == 'correction' %}<p class="mt-2 text-sm text-gray-700">Requested: {{ item.requested_time_in.strftime('%b %d, %Y %I:%M %p') if item.requested_time_in else '—' }} to {{ item.requested_time_out.strftime('%b %d, %Y %I:%M %p') if item.requested_time_out else '—' }}</p>{% elif item.request_type == 'lunch_correction' %}<p class="mt-2 text-sm text-gray-700">Requested lunch-out: {{ item.requested_lunch_start.strftime('%b %d, %Y %I:%M %p') if item.requested_lunch_start else '—' }} · Afternoon time-in: {{ item.requested_lunch_end.strftime('%b %d, %Y %I:%M %p') if item.requested_lunch_end else '—' }}</p>{% endif %}
+            <p class="mt-2 whitespace-pre-line text-sm text-gray-600">{{ item.reason }}</p>
+            {% if item.review_note %}<p class="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-600"><strong>Supervisor note:</strong> {{ item.review_note }}</p>{% endif %}
+            {% set created_local = item.created_at|local_datetime %}<time class="mt-2 block text-xs text-gray-500" datetime="{{ created_local.isoformat() }}">Submitted {{ created_local.strftime('%b %d, %Y · %I:%M %p') }}</time>
+          </div>
+          {% if is_supervisor and item.status == 'pending' %}
+          <form method="post" action="{{ url_for('review_attendance_request', request_id=item.id) }}" class="w-full max-w-sm space-y-2">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <label><span class="sr-only">Optional review note</span><textarea name="review_note" maxlength="1000" rows="2" class="w-full" placeholder="Optional review note…"></textarea></label>
+            <div class="flex justify-end gap-2"><button name="decision" value="reject" class="min-h-10 rounded-lg border border-red-200 px-3 text-sm font-semibold text-red-700 hover:bg-red-50">Reject</button><button name="decision" value="approve" class="min-h-10 rounded-lg bg-teal-700 px-3 text-sm font-semibold text-white hover:bg-teal-800">Approve</button></div>
+          </form>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}<div class="p-10 text-center text-gray-500">{% if is_supervisor %}No attendance requests to review.{% else %}You have not submitted any requests yet.{% endif %}</div>{% endif %}
+  </section>
+</main>
+{% endblock %}

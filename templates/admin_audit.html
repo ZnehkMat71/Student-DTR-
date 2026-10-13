@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Audit history · SIP Tracker{% endblock %}
+{% block body %}
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <header class="page-header"><div><p class="text-sm font-semibold uppercase tracking-wide text-teal-700">Administration</p><h1 class="font-bold text-gray-900">Audit history</h1><p>Security-relevant account, attendance, and policy changes.</p></div><a href="{{ url_for('admin_dashboard') }}" class="inline-flex min-h-11 items-center rounded-lg border border-gray-200 bg-white px-4 font-semibold text-gray-700">Back to users</a></header>
+  <section class="dashboard-card overflow-hidden">
+    {% if pagination.items %}
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[760px]">
+        <thead class="bg-gray-50"><tr><th scope="col" class="px-4 py-3 text-left">When</th><th scope="col" class="px-4 py-3 text-left">Actor</th><th scope="col" class="px-4 py-3 text-left">Action</th><th scope="col" class="px-4 py-3 text-left">Target</th><th scope="col" class="px-4 py-3 text-left">Details</th></tr></thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for entry in pagination.items %}
+          {% set created_local = entry.created_at|local_datetime %}<tr><td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600"><time datetime="{{ created_local.isoformat() }}">{{ created_local.strftime('%Y-%m-%d %H:%M') }}</time></td><td class="px-4 py-3 font-medium text-gray-900">{{ entry.actor_username }}</td><td class="px-4 py-3"><span class="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold">{{ entry.action|replace('_', ' ')|title }}</span></td><td class="px-4 py-3 text-gray-700">{{ entry.target_username or '—' }}</td><td class="max-w-xl px-4 py-3 text-sm text-gray-600">{{ entry.details }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="p-10 text-center text-gray-500">No audit events recorded yet.</div>{% endif %}
+    {% if pagination.pages > 1 %}
+    <nav class="flex items-center justify-between border-t border-gray-200 px-5 py-4" aria-label="Audit pages">
+      <p class="text-sm text-gray-500">Page {{ pagination.page }} of {{ pagination.pages }}</p><div class="flex gap-2">
+      {% if pagination.has_prev %}<a class="inline-flex min-h-10 items-center rounded-lg border border-gray-200 px-3 font-semibold" href="{{ url_for('admin_audit', page=pagination.prev_num) }}">Previous</a>{% endif %}
+      {% if pagination.has_next %}<a class="inline-flex min-h-10 items-center rounded-lg border border-gray-200 px-3 font-semibold" href="{{ url_for('admin_audit', page=pagination.next_num) }}">Next</a>{% endif %}
+      </div>
+    </nav>{% endif %}
+  </section>
+</main>
+{% endblock %}

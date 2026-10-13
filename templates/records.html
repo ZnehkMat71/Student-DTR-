@@ -3,23 +3,8 @@ body %}
 <div class="min-h-screen py-8">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Back Button -->
-    <div class="mb-8">
-      <a
-        href="{{
-          url_for('dashboard')
-          if student.id == current_user.id
-          else url_for('supervisor_dashboard')
-        }}"
-        class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-xl font-medium transition-colors duration-200"
-      >
-        <i class="fas fa-arrow-left mr-2"></i>
-        Back to {{ 'Dashboard' if student.id == current_user.id else 'Supervisor
-        Dashboard' }}
-      </a>
-    </div>
-
-    <!-- Header -->
-    <div class="text-center mb-8">
+    <div class="page-header">
+      <div>
       <h1
         class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2"
       >
@@ -28,19 +13,40 @@ body %}
       <p class="text-gray-600">
         Detailed attendance records for {{ student.username }}
       </p>
+      </div>
+      <a
+        href="{{
+          url_for('dashboard')
+          if student.id == current_user.id
+          else url_for('supervisor_dashboard')
+        }}"
+        class="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50"
+      >
+        <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>
+        Back to {{ 'Dashboard' if student.id == current_user.id else 'Students' }}
+      </a>
     </div>
+
+    <form method="get" class="dashboard-card mb-6 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
+      {% if student.id != current_user.id %}<input type="hidden" name="student" value="{{ student.username }}">{% endif %}
+      <label><span class="mb-1 block text-sm font-medium text-gray-700">From</span><input type="date" name="start_date" value="{{ start_date }}" class="w-full"></label>
+      <label><span class="mb-1 block text-sm font-medium text-gray-700">To</span><input type="date" name="end_date" value="{{ end_date }}" class="w-full"></label>
+      <label><span class="mb-1 block text-sm font-medium text-gray-700">Status</span><select name="status" class="w-full"><option value="">All statuses</option>{% for value, label in [('pending','Pending review'),('approved','Approved'),('rejected','Rejected'),('absent','Absent'),('incomplete','Incomplete'),('complete','Complete'),('late','Late')] %}<option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <div class="flex items-end gap-2"><button class="min-h-11 flex-1 rounded-lg bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800">Apply filters</button><a href="{{ url_for('records', student=student.username) if student.id != current_user.id else url_for('records') }}" class="inline-flex min-h-11 items-center rounded-lg border border-gray-200 px-3 font-semibold text-gray-700">Clear</a></div>
+      <div class="flex items-end"><a href="{{ url_for('export_csv' if student.id == current_user.id else 'export_all_csv', start_date=start_date, end_date=end_date, status=status_filter) }}" class="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-teal-200 px-3 font-semibold text-teal-800 hover:bg-teal-50"><i class="fas fa-file-csv mr-2" aria-hidden="true"></i>Export CSV</a></div>
+    </form>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       <div
-        class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300"
+        class="dashboard-card p-5"
       >
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">
               Total Records
             </h3>
-            <p class="text-2xl font-bold text-gray-900">{{ records|length }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ pagination.total }}</p>
           </div>
           <div
             class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"
@@ -51,7 +57,7 @@ body %}
       </div>
 
       <div
-        class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300"
+        class="dashboard-card p-5"
       >
         <div class="flex items-center justify-between">
           <div>
@@ -69,7 +75,7 @@ body %}
       </div>
 
       <div
-        class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300"
+        class="dashboard-card p-5"
       >
         <div class="flex items-center justify-between">
           <div>
@@ -87,7 +93,7 @@ body %}
       </div>
 
       <div
-        class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300"
+        class="dashboard-card p-5"
       >
         <div class="flex items-center justify-between">
           <div>
@@ -105,7 +111,7 @@ body %}
       </div>
 
       <div
-        class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300"
+        class="dashboard-card p-5"
       >
         <div class="flex items-center justify-between">
           <div>
@@ -138,7 +144,7 @@ body %}
       {% else %} {% for rec in records %} {% set detail = record_details[rec.id]
       %} {% set status = detail.status[0] %} {% set tone = detail.status[1] %}
       <article
-        class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+        class="dashboard-card overflow-hidden"
       >
         <header
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-gray-100"
@@ -148,8 +154,7 @@ body %}
               Biometric session
             </p>
             <h2 class="text-lg font-semibold text-gray-900">
-              {{ rec.time_in.strftime('%A, %d %b %Y') if rec.time_in else
-              'Unregistered session' }}
+              {{ (rec.work_date or rec.time_in.date()).strftime('%A, %d %b %Y') if rec.work_date or rec.time_in else 'Unregistered session' }}
             </h2>
           </div>
           <div class="flex items-center gap-3">
@@ -241,29 +246,15 @@ body %}
       </article>
       {% endfor %} {% endif %}
     </section>
+    {% if pagination.pages > 1 %}
+    <nav class="mt-6 flex items-center justify-between rounded-xl bg-white px-5 py-4 shadow-sm" aria-label="Attendance record pages">
+      <p class="text-sm text-gray-500">Page {{ pagination.page }} of {{ pagination.pages }} · {{ pagination.total }} records</p>
+      <div class="flex gap-2">
+        {% if pagination.has_prev %}<a class="inline-flex min-h-10 items-center rounded-lg border border-gray-200 px-3 font-semibold" href="{{ url_for('records', student=student.username if student.id != current_user.id else None, page=pagination.prev_num, start_date=start_date, end_date=end_date, status=status_filter) }}">Previous</a>{% endif %}
+        {% if pagination.has_next %}<a class="inline-flex min-h-10 items-center rounded-lg border border-gray-200 px-3 font-semibold" href="{{ url_for('records', student=student.username if student.id != current_user.id else None, page=pagination.next_num, start_date=start_date, end_date=end_date, status=status_filter) }}">Next</a>{% endif %}
+      </div>
+    </nav>
+    {% endif %}
   </div>
 </div>
-{% endblock %} {% block scripts %}
-<script>
-  // Update sidebar stats when page loads
-  document.addEventListener('DOMContentLoaded', function() {
-    updateSidebarStats();
-  });
-
-  function updateSidebarStats() {
-    // Update total hours in sidebar
-    const totalHours = {{ total_hours|default(0)|round(2) }};
-    const totalHoursElement = document.querySelector('#profileSidebar .text-blue-600');
-    if (totalHoursElement) {
-      totalHoursElement.textContent = totalHours;
-    }
-
-    // Update attendance percentage
-    const attendancePercent = {{ attendance_percent }};
-    const attendanceElement = document.querySelector('#profileSidebar .text-green-600');
-    if (attendanceElement) {
-      attendanceElement.textContent = attendancePercent + '%';
-    }
-  }
-</script>
 {% endblock %}

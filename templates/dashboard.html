@@ -1,291 +1,234 @@
 {% extends 'base.html' %}
 {% block title %}Student Dashboard{% endblock %}
-{% block head %}
-{% endblock %}
 {% block body %}
-    <div class="min-h-screen py-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Student Dashboard
-          </h1>
-          <p class="text-gray-600">Track your attendance and working hours</p>
+<div class="min-h-screen">
+  <div class="student-dashboard-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="student-dashboard-shell">
+      <header class="page-header">
+        <div>
+          <h1>Student dashboard</h1>
+          <p>Your attendance and internship progress at a glance.</p>
         </div>
+      </header>
 
-        <!-- Actions Section (Always on top and centered) -->
-        <div class="max-w-4xl mx-auto mb-12">
-          <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Today's Actions</h2>
-            
-            <!-- Status Card -->
-            <div class="mb-8">
-              <div class="bg-gradient-to-r {{ 'from-green-50 to-emerald-50 border-green-200' if can_time_out else 'from-gray-50 to-slate-50 border-gray-200' }} border rounded-xl p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Today's Status</h3>
-                    <div class="text-gray-700">
-                      <span class="font-medium">Time In:</span>
-                      {% if today_time_in %}
-                        <span class="text-green-600 font-semibold">{{ today_time_in }}</span>
-                      {% else %}
-                        <span class="text-gray-500">Not timed in</span>
-                      {% endif %}
-                      {% if today_time_out %}
-                        <span class="ml-4">
-                          <span class="font-medium">Time Out:</span>
-                          <span class="text-red-600 font-semibold">{{ today_time_out }}</span>
-                        </span>
-                      {% endif %}
-                    </div>
-                    {% if today_record and today_record.time_in %}
-                      <div class="mt-3 text-sm text-gray-600 space-y-1">
-                        {% if today_record.lunch_start %}
-                          <div>
-                            <span class="font-medium">Lunch:</span>
-                            {{ today_record.lunch_start.strftime('%I:%M %p') }}
-                            {% if today_record.lunch_end %}
-                              <span class="text-gray-500">– {{ today_record.lunch_end.strftime('%I:%M %p') }}</span>
-                            {% else %}
-                              <span class="text-amber-600 font-medium">(in progress)</span>
-                            {% endif %}
-                            <span class="text-gray-400 text-xs ml-1">max 1 hr</span>
-                          </div>
-                        {% endif %}
-                        {% if today_record.coffee_start %}
-                          <div>
-                            <span class="font-medium">Coffee:</span>
-                            {{ today_record.coffee_start.strftime('%I:%M %p') }}
-                            {% if today_record.coffee_end %}
-                              <span class="text-gray-500">– {{ today_record.coffee_end.strftime('%I:%M %p') }}</span>
-                            {% else %}
-                              <span class="text-amber-600 font-medium">(in progress)</span>
-                            {% endif %}
-                            <span class="text-gray-400 text-xs ml-1">max 30 min</span>
-                          </div>
-                        {% endif %}
-                      </div>
-                    {% endif %}
+      <div class="dashboard-content-grid">
+        <div class="attendance-panel">
+          <div class="attendance-panel-inner">
+            <div class="attendance-panels">
+              <div class="attendance-meta">
+                <div class="attendance-status-card">
+                  <span class="attendance-status-indicator {% if can_time_in %}is-ready{% elif on_lunch_break or on_coffee_break %}is-break{% elif can_time_out %}is-active{% else %}is-complete{% endif %}" aria-hidden="true"></span>
+                  <div class="attendance-meta-copy">
+                    <span class="attendance-meta-label">Attendance status</span>
+                    <strong>
+                      {% if can_time_in %}Ready to clock in{% elif on_lunch_break or on_coffee_break %}Break in progress{% elif can_time_out %}Ready to clock out{% else %}Completed today{% endif %}
+                    </strong>
                   </div>
-                  <div class="flex-shrink-0">
-                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium {% if can_time_in %}bg-green-100 text-green-800{% elif on_lunch_break or on_coffee_break %}bg-amber-100 text-amber-900{% elif can_time_out %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                      {% if can_time_in %}
-                        <i class="fas fa-clock mr-2"></i>Ready to Time In
-                      {% elif on_lunch_break %}
-                        <i class="fas fa-utensils mr-2"></i>On lunch break
-                      {% elif on_coffee_break %}
-                        <i class="fas fa-mug-hot mr-2"></i>On coffee break
-                      {% elif can_time_out %}
-                        <i class="fas fa-clock mr-2"></i>Ready to Time Out
-                      {% else %}
-                        <i class="fas fa-check-circle mr-2"></i>Completed
-                      {% endif %}
-                    </span>
-                  </div>
-        </div>
-      </div>
-    </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <form method="post" action="{{ url_for('time_in') }}" class="flex-1 max-w-xs">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-                <button type="submit" 
-                        class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent text-lg font-medium rounded-xl text-white transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:ring-green-500 shadow-lg hover:shadow-xl' if can_time_in else 'bg-gray-400 cursor-not-allowed' }}"
-                        {{ 'disabled' if not can_time_in else '' }}>
-                  <i class="fas fa-sign-in-alt mr-3 text-xl"></i>
-                  Time In
-              </button>
-            </form>
-              <form method="post" action="{{ url_for('time_out') }}" class="flex-1 max-w-xs">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-                <button type="submit" 
-                        class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent text-lg font-medium rounded-xl text-white transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ 'bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 focus:ring-red-500 shadow-lg hover:shadow-xl' if can_time_out else 'bg-gray-400 cursor-not-allowed' }}"
-                        {{ 'disabled' if not can_time_out else '' }}>
-                  <i class="fas fa-sign-out-alt mr-3 text-xl"></i>
-                  Time Out
-              </button>
-            </form>
-          </div>
-
-            {% if scheduled_breaks %}
-            <div class="border-t border-gray-100 pt-6 mt-2">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Scheduled breaks</h3>
-                <span class="text-xs text-gray-500">Automatic status</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {% for break in scheduled_breaks %}
-                <div class="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm font-semibold text-gray-800"><i class="fas {{ 'fa-utensils' if break.label == 'Lunch window' else 'fa-mug-hot' }} text-gray-400 mr-2"></i>{{ break.label }}</span>
-                    <span class="text-xs font-bold {% if break.status == 'Covered' %}text-emerald-700{% elif break.status == 'Pending' %}text-sky-700{% else %}text-gray-500{% endif %}">{{ break.status }}</span>
-                  </div>
-                  <p class="mt-1 text-xs text-gray-500">{{ break.detail }}</p>
                 </div>
-                {% endfor %}
+                <div class="attendance-user-card">
+                  <span class="attendance-user-avatar"><i class="fas fa-user" aria-hidden="true"></i></span>
+                  <div class="attendance-meta-copy">
+                    <span class="attendance-meta-label">Student</span>
+                    <strong>{{ current_user.username }}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="attendance-hero">
+                {% if can_time_in %}
+                  <form method="post" action="{{ url_for('time_in') }}" class="attendance-clock-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                    <button type="submit" class="attendance-clock-button">
+                      <span class="attendance-ring"><i class="fas fa-fingerprint" aria-hidden="true"></i></span>
+                      <span class="attendance-clock-label">Clock In</span>
+                    </button>
+                  </form>
+                {% elif can_time_out and not on_lunch_break and not on_coffee_break %}
+                  <form method="post" action="{{ url_for('time_out') }}" class="attendance-clock-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                    <button type="submit" class="attendance-clock-button">
+                      <span class="attendance-ring"><i class="fas fa-fingerprint" aria-hidden="true"></i></span>
+                      <span class="attendance-clock-label">Clock Out</span>
+                    </button>
+                  </form>
+                {% else %}
+                  <div class="attendance-clock-button is-disabled" aria-disabled="true">
+                    <span class="attendance-ring"><i class="fas fa-fingerprint" aria-hidden="true"></i></span>
+                    <span class="attendance-clock-label">{% if on_lunch_break %}Lunch break{% elif on_coffee_break %}Coffee break{% else %}Attendance complete{% endif %}</span>
+                  </div>
+                {% endif %}
+                <div class="attendance-date">
+                  <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                  {{ today_record.work_date.strftime('%A, %d %b') if today_record and today_record.work_date else 'Today' }}
+                </div>
               </div>
             </div>
+
+            <div class="attendance-actions">
+              <div class="attendance-time-card">
+                <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                <span>Clock in</span>
+                <strong>{{ today_time_in if today_time_in else '—' }}</strong>
+              </div>
+              <div class="attendance-time-card">
+                <i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                <span>Clock out</span>
+                <strong>{{ today_time_out if today_time_out else '—' }}</strong>
+              </div>
+
+              {% if on_lunch_break %}
+                <form method="post" action="{{ url_for('break_end') }}" class="w-full">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                  <input type="hidden" name="break_type" value="lunch" />
+                  <button type="submit" class="attendance-action w-full">
+                    <i class="fas fa-utensils"></i>
+                    <span>End Break</span>
+                  </button>
+                </form>
+              {% elif can_start_lunch %}
+                <form method="post" action="{{ url_for('break_start') }}" class="w-full">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                  <input type="hidden" name="break_type" value="lunch" />
+                  <button type="submit" class="attendance-action w-full">
+                    <i class="fas fa-utensils"></i>
+                    <span>Start lunch</span>
+                  </button>
+                </form>
+              {% else %}
+                <button type="button" class="attendance-action is-muted w-full" disabled>
+                  <i class="fas fa-utensils"></i>
+                  <span>Lunch break</span>
+                </button>
+              {% endif %}
+            </div>
+
+            {% if missed_lunch_punch %}
+              <div class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p class="mb-3 font-medium">Your lunch time-out was missed. Do not enter a made-up time; submit the actual lunch-out and afternoon-return times for supervisor review.</p>
+                <a class="inline-flex min-h-11 items-center rounded-lg bg-blue-600 px-4 font-semibold text-white hover:bg-blue-700" href="{{ url_for('attendance_requests', request_type='lunch_correction', requested_date=today_record.work_date or today_record.time_in.date(), attendance_id=today_record.id) }}">Request lunch correction</a>
+              </div>
             {% endif %}
-
-            <!-- Additional Actions -->
-            <div class="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="{{ url_for('records') }}" 
-                 class="inline-flex items-center justify-center px-6 py-3 border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl font-medium transition-colors duration-200">
-                <i class="fas fa-history mr-2"></i>View Time Records
-              </a>
-              <a href="{{ url_for('export_csv') }}" 
-                 class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                <i class="fas fa-download mr-2"></i>Export to CSV
-              </a>
-            </div>
           </div>
         </div>
 
-
-        <!-- Stats Section -->
-        <div class="mb-12">
-          <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Your Statistics</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-shadow duration-300">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                    <i class="fas fa-clock text-blue-500 mr-3 text-xl"></i>
-                    Total Hours Worked
-                  </h3>
-                  <p class="text-3xl font-bold text-green-600">{{ '%.2f' % total_hours }}</p>
-                </div>
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <i class="fas fa-chart-line text-green-600 text-2xl"></i>
-        </div>
-            </div>
+        <div class="dashboard-chart-card">
+          <h3>Attendance trend</h3>
+          <p>Last 7 days</p>
+          <div style="margin-top: 1rem; height: 260px;">
+            <canvas id="attendanceChart" aria-label="Attendance chart"></canvas>
           </div>
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-shadow duration-300">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                    <i class="fas fa-calendar-check text-purple-500 mr-3 text-xl"></i>
-                    Attendance Streak
-                  </h3>
-                  <p class="text-3xl font-bold text-purple-600">{{ streak }}</p>
-                </div>
-                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                  <i class="fas fa-fire text-purple-600 text-2xl"></i>
-                </div>
+          <div class="mini-stat-row">
+            <div class="mini-stat">
+              <strong>{{ streak }}</strong>
+              <span>Streak</span>
             </div>
-          </div>
+            <div class="mini-stat">
+              <strong>{{ total_hours|round(1) }}h</strong>
+              <span>Hours</span>
+            </div>
+            <div class="mini-stat">
+              <strong>{{ remaining_hours|round(1) }}h</strong>
+              <span>Left</span>
+            </div>
           </div>
         </div>
-
-        <!-- Weekly Attendance and Chart Section -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
-          <!-- Weekly Attendance Table -->
-          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-              <h2 class="text-xl font-semibold text-gray-800 flex items-center">
-                <i class="fas fa-calendar-week text-blue-500 mr-3"></i>
-                Weekly Attendance
-              </h2>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time In</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Out</th>
-                </tr>
-              </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                {% for d, rec in week_attendance.items() %}
-                  <tr class="hover:bg-gray-50 transition-colors duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {{ d.strftime('%A, %Y-%m-%d') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                    {% if rec and rec.time_in and rec.time_out %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <i class="fas fa-check-circle mr-1"></i>Present
-                        </span>
-                    {% else %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          <i class="fas fa-times-circle mr-1"></i>Absent
-                        </span>
-                    {% endif %}
-                  </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {% if rec and rec.time_in %}
-                        <span class="text-green-600 font-medium">{{ rec.time_in.strftime('%I:%M %p') }}</span>
-                      {% else %}
-                        <span class="text-gray-400">N/A</span>
-                      {% endif %}
-                  </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {% if rec and rec.time_out %}
-                        <span class="text-red-600 font-medium">{{ rec.time_out.strftime('%I:%M %p') }}</span>
-                      {% else %}
-                        <span class="text-gray-400">N/A</span>
-                      {% endif %}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
       </div>
-    </div>
 
-          <!-- Chart Section -->
-          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div class="mb-6">
-              <h2 class="text-xl font-semibold text-gray-800 flex items-center">
-                <i class="fas fa-chart-bar text-purple-500 mr-3"></i>
-                Hours Worked Per Day
-              </h2>
-              <p class="text-sm text-gray-500 mt-1">Last 7 days performance</p>
+      <div class="dashboard-metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">
+            <span>Today's attendance</span>
+            <span class="metric-icon"><i class="fas fa-user-check"></i></span>
+          </div>
+          <p class="metric-value">{{ today_time_in if today_time_in else 'Not recorded' }}</p>
+          <div class="metric-trend">
+            <i class="fas fa-circle"></i>
+            {% if on_lunch_break %}On lunch break{% elif can_time_out %}Clocked in{% elif today_time_out %}Completed{% elif can_time_in %}Not clocked in{% else %}Awaiting approval{% endif %}
+          </div>
         </div>
-            <div class="relative">
-              <canvas id="attendanceChart" height="300"></canvas>
-      </div>
-            <div class="mt-4 text-center">
-              <p class="text-sm text-gray-500">Bars show total hours per day over the last 7 days</p>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <span>Completed hours</span>
+            <span class="metric-icon"><i class="fas fa-clock"></i></span>
           </div>
+          <p class="metric-value">{{ total_hours|round(1) }}h</p>
+          <div class="metric-trend"><i class="fas fa-arrow-up"></i> {{ progress_percent|int }}%</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <span>Required Hours</span>
+            <span class="metric-icon"><i class="fas fa-list-check"></i></span>
           </div>
+          <p class="metric-value">{{ target_hours }}h</p>
+          <div class="metric-trend"><i class="fas fa-check"></i> Goal</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <span>Remaining</span>
+            <span class="metric-icon"><i class="fas fa-hourglass-half"></i></span>
+          </div>
+          <p class="metric-value">{{ remaining_hours|round(1) }}h</p>
+          <div class="metric-trend"><i class="fas fa-arrow-right"></i> left</div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-      var ctx = document.getElementById('attendanceChart').getContext('2d');
-      var attendanceChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: {{ chart_labels|tojson }}, datasets: [{ label: 'Daily Hours Worked', data: {{ chart_data|tojson }}, backgroundColor: 'rgba(40, 167, 69, 0.6)', borderColor: 'rgba(40, 167, 69, 1)', borderWidth: 1 }] },
-        options: { scales: { y: { beginAtZero: true, title: { display: true, text: 'Hours', font: { size: 14 } } } }, plugins: { tooltip: { callbacks: { label: function(context) { var value = context.parsed.y; var hours = Math.floor(value); var minutes = Math.round((value - hours) * 60); return hours + ':' + (minutes < 10 ? '0' : '') + minutes + ' hours'; } } } } }
-      });
-
-      // Update sidebar stats when page loads
-      document.addEventListener('DOMContentLoaded', function() {
-        updateSidebarStats();
-      });
-
-      function updateSidebarStats() {
-        // Update total hours in sidebar
-        const totalHoursElement = document.querySelector('#profileSidebar .text-blue-600');
-        if (totalHoursElement) {
-          totalHoursElement.textContent = '{{ "%.1f" % total_hours }}';
-        }
-        
-        // Calculate and update attendance percentage
-        const totalRecords = {{ records|length if records is defined else 0 }};
-        const presentRecords = {{ records|selectattr('time_in')|selectattr('time_out')|list|length if records is defined else 0 }};
-        const attendancePercent = totalRecords > 0 ? Math.round((presentRecords / totalRecords) * 100) : 0;
-        
-        const attendanceElement = document.querySelector('#profileSidebar .text-green-600');
-        if (attendanceElement) {
-          attendanceElement.textContent = attendancePercent + '%';
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const chartCanvas = document.getElementById('attendanceChart');
+  if (chartCanvas) {
+    const ctx = chartCanvas.getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ chart_labels|tojson }},
+        datasets: [{
+          label: 'Hours worked',
+          data: {{ chart_data|tojson }},
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.12)',
+          borderWidth: 3,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#2563eb',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const value = context.parsed.y || 0;
+                return `${value.toFixed(1)} hrs`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+            ticks: { color: '#64748b' }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+            ticks: { color: '#64748b' }
+          }
         }
       }
-    </script>
+    });
+  }
+</script>
 {% endblock %}
